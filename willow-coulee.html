@@ -1,0 +1,253 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Willow Coulee Farm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: wide sky band hero, then a single reading column with a full-width season chart in the middle */
+:root {
+  --bg: #F4F6EF;
+  --surface: #FFFFFF;
+  --ink: #1E2A1F;
+  --muted: #5A6656;
+  --rule: #D6DDCD;
+  --canola: #C9980A;
+  --canola-soft: #F6E7B3;
+  --sky: #3D6A86;
+  --sky-soft: #DCE8EF;
+  --field: #5E7F3A;
+  --display: "Alegreya", Georgia, "Times New Roman", serif;
+  --body: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121811; --surface: #1A2219; --ink: #E5EBDF; --muted: #A2AE9C; --rule: #2C3829;
+    --canola: #E6B93A; --canola-soft: #3A3014; --sky: #8DB7D1; --sky-soft: #1B2B35; --field: #93B86A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121811; --surface: #1A2219; --ink: #E5EBDF; --muted: #A2AE9C; --rule: #2C3829;
+  --canola: #E6B93A; --canola-soft: #3A3014; --sky: #8DB7D1; --sky-soft: #1B2B35; --field: #93B86A; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1.125rem; line-height: 1.6; padding-inline: 20px; padding-block: 0; }
+a { color: var(--sky); text-underline-offset: 0.18em; }
+:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; border-radius: 3px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.1; }
+p { margin: 0; }
+
+.sample { max-width: 60rem; margin: 0 auto; padding-block: 0.6rem; font-size: 0.9rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; border-bottom: 1px dashed var(--rule); }
+.sample strong { color: var(--ink); }
+
+.wrap { max-width: 60rem; margin: 0 auto; padding-block: 0 3rem; display: grid; gap: clamp(3rem, 7vw, 4.5rem); }
+
+/* Hero */
+.hero { display: grid; gap: 1.5rem; padding-top: clamp(2rem, 6vw, 4rem); }
+.horizon { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--canola) 0 38%, var(--field) 38% 70%, var(--sky) 70%); max-width: 22rem; }
+.hero h1 { font-size: clamp(2.8rem, 9vw, 5.25rem); letter-spacing: -0.01em; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--field); }
+.lede { max-width: 36rem; font-size: 1.25rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; color: var(--muted); font-size: 1rem; }
+.facts b { color: var(--ink); font-weight: 700; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.btn { font: 700 1rem/1 var(--body); padding: 0.8rem 1.2rem; border-radius: 8px; border: 2px solid var(--ink); background: var(--ink); color: var(--bg); text-decoration: none; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:hover { background: var(--field); border-color: var(--field); color: var(--bg); }
+
+section { display: grid; gap: 1.25rem; }
+.kicker { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--canola); }
+h2 { font-size: clamp(1.9rem, 5vw, 2.6rem); }
+.prose { max-width: 38rem; display: grid; gap: 0.9rem; }
+
+/* Season chart */
+.season-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1.25rem; }
+.season { display: grid; grid-template-columns: 9.5rem repeat(6, minmax(3.25rem, 1fr)); min-width: 34rem; row-gap: 0.55rem; align-items: center; font-size: 0.98rem; }
+.season .m { font-weight: 700; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.season .crop { font-weight: 500; padding-right: 0.5rem; }
+.bar { height: 14px; border-radius: 999px; background: var(--field); }
+.bar.peak { background: var(--canola); }
+.season-key { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-size: 0.9rem; color: var(--muted); margin-top: 0.9rem; }
+.dot { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 50%; vertical-align: -0.05em; margin-right: 0.35rem; }
+
+/* Offerings */
+.offer { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.offer article { display: grid; gap: 0.5rem; align-content: start; padding-top: 1rem; border-top: 3px solid var(--field); min-width: 0; }
+.offer h3 { font-size: 1.45rem; }
+.price { font-weight: 700; color: var(--sky); }
+
+/* Beef calculator */
+.calc { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); background: var(--sky-soft); border-radius: 12px; padding: clamp(1.1rem, 3vw, 1.75rem); }
+.calc fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.calc legend { font-weight: 700; margin-bottom: 0.4rem; }
+.choice { display: flex; gap: 0.6rem; align-items: center; }
+.choice input { width: auto; margin: 0; accent-color: var(--sky); }
+.out { display: grid; gap: 0.35rem; align-content: start; min-width: 0; }
+.out dl { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 1rem; margin: 0; font-variant-numeric: tabular-nums; }
+.out dt { color: var(--muted); }
+.out dd { margin: 0; font-weight: 700; text-align: right; }
+.out .total { border-top: 1px solid var(--rule); padding-top: 0.4rem; font-size: 1.2rem; }
+.note { font-size: 0.92rem; color: var(--muted); }
+
+/* Visit */
+.visit { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.hours { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1.25rem; margin: 0; font-variant-numeric: tabular-nums; }
+.hours dt { font-weight: 700; }
+.hours dd { margin: 0; }
+form { display: grid; gap: 0.75rem; }
+label { font-weight: 500; display: grid; gap: 0.3rem; }
+input, select, textarea { font: inherit; font-size: 1rem; padding: 0.6rem 0.7rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; }
+.sent { background: var(--canola-soft); border-radius: 8px; padding: 0.7rem 0.9rem; font-size: 0.98rem; }
+
+footer { border-top: 1px solid var(--rule); padding-top: 1.25rem; color: var(--muted); font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<p class="sample"><strong>Sample site.</strong> <span>Willow Coulee Farm is a made-up business. Built by Acton Pruchidale (Claude) to show what a small-business site can look like.</span> <a href="#services">Want one?</a></p>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="horizon" aria-hidden="true"></div>
+    <h1>Willow Coulee Farm <em>vegetables, eggs &amp; grass-fed beef</em></h1>
+    <p class="lede">A family farm in central Alberta. We grow on 12 acres of black soil, raise a small herd on pasture, and sell everything right from the farm gate.</p>
+    <div class="facts">
+      <span><b>Farm gate:</b> open June to October</span>
+      <span><b>Weekly boxes:</b> 18 weeks</span>
+      <span><b>Beef:</b> butcher dates in October</span>
+    </div>
+    <div class="actions">
+      <a class="btn" href="#boxes">Sign up for a box</a>
+      <a class="btn ghost" href="#beef">Order beef</a>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-season">
+    <p class="kicker">What’s ready when</p>
+    <h2 id="h-season">Our season is short, so we plan every row.</h2>
+    <p class="prose">We get about 110 frost-free days. Here’s when each crop usually comes in, so you know what to expect in your box.</p>
+    <div class="season-wrap" role="region" aria-label="Harvest calendar, May to October" tabindex="0">
+      <div class="season" id="season"></div>
+      <div class="season-key"><span><span class="dot" style="background:var(--field)"></span>Available</span><span><span class="dot" style="background:var(--canola)"></span>Best of the year</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-boxes" id="boxes">
+    <p class="kicker">From the farm</p>
+    <h2 id="h-boxes">Three ways to buy</h2>
+    <div class="offer">
+      <article>
+        <h3>Weekly veggie box</h3>
+        <p>18 weeks of whatever’s best, picked the morning you collect it. Pick up at the farm or at our Thursday drop in town.</p>
+        <p class="price">$540 for the season · half box $320</p>
+      </article>
+      <article>
+        <h3>Pasture eggs</h3>
+        <p>From our 200 laying hens, moved to fresh grass every few days. Shells vary from cream to deep brown.</p>
+        <p class="price">$7 a dozen · subscriptions available</p>
+      </article>
+      <article>
+        <h3>Grass-fed beef</h3>
+        <p>Raised on our own pasture and finished on hay. Cut and wrapped at a provincially inspected butcher.</p>
+        <p class="price">$6.25/lb hanging weight</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-beef" id="beef">
+    <p class="kicker">Beef by the share</p>
+    <h2 id="h-beef">Work out your beef order</h2>
+    <div class="calc">
+      <fieldset>
+        <legend>How much freezer space do you have?</legend>
+        <label class="choice"><input type="radio" name="share" id="share-q" value="0.25" checked> Quarter (about 4 cu ft)</label>
+        <label class="choice"><input type="radio" name="share" id="share-h" value="0.5"> Half (about 8 cu ft)</label>
+        <label class="choice"><input type="radio" name="share" id="share-w" value="1"> Whole (about 16 cu ft)</label>
+      </fieldset>
+      <div class="out" aria-live="polite">
+        <dl>
+          <dt>Hanging weight</dt><dd id="hw"></dd>
+          <dt>Beef price ($6.25/lb)</dt><dd id="bp"></dd>
+          <dt>Cut &amp; wrap ($1.20/lb)</dt><dd id="cw"></dd>
+          <dt class="total">Estimated total</dt><dd class="total" id="tot"></dd>
+          <dt>Meat in your freezer</dt><dd id="take"></dd>
+        </dl>
+        <p class="note">Based on a typical 640 lb carcass. Your final price uses the real hanging weight. A $200 deposit holds your spot.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-visit">
+    <p class="kicker">Come by</p>
+    <h2 id="h-visit">Visit the farm gate</h2>
+    <div class="visit">
+      <div class="prose">
+        <p>Range Road 263, 6 km south of the highway. Look for the blue sign and the willow row.</p>
+        <dl class="hours">
+          <dt>Wed</dt><dd>3 pm to 7 pm</dd>
+          <dt>Sat</dt><dd>9 am to 2 pm</dd>
+          <dt>Other days</dt><dd>Call ahead</dd>
+        </dl>
+        <p>Phone: <span>780-555-0142</span></p>
+      </div>
+      <form id="contact">
+        <label for="c-name">Your name<input id="c-name" name="name" autocomplete="name" required></label>
+        <label for="c-want">I’m interested in
+          <select id="c-want" name="want"><option>Weekly veggie box</option><option>Eggs</option><option>Beef</option><option>Something else</option></select>
+        </label>
+        <label for="c-msg">Message<textarea id="c-msg" name="msg" rows="3"></textarea></label>
+        <button class="btn" type="submit">Send message</button>
+        <p class="sent" id="sent" hidden>This is a sample site, so nothing was sent. On a real site this would reach the farm’s inbox.</p>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <span>Willow Coulee Farm (fictional)</span>
+    <span>Sample by Acton Pruchidale</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var months = ["May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+  // [crop, first month index, last month index, peak start, peak end]
+  var crops = [
+    ["Spinach & greens", 0, 4, 1, 1],
+    ["Radishes", 0, 3, 1, 1],
+    ["Peas", 1, 2, 2, 2],
+    ["New potatoes", 2, 5, 3, 3],
+    ["Carrots", 2, 5, 3, 4],
+    ["Beans", 2, 3, 3, 3],
+    ["Sweet corn", 3, 3, 3, 3],
+    ["Tomatoes", 3, 4, 3, 3],
+    ["Squash & pumpkins", 4, 5, 4, 4]
+  ];
+  var g = document.getElementById("season");
+  var h = document.createElement("span"); g.appendChild(h);
+  months.forEach(function (m) { var s = document.createElement("span"); s.className = "m"; s.textContent = m; g.appendChild(s); });
+  crops.forEach(function (c) {
+    var n = document.createElement("span"); n.className = "crop"; n.textContent = c[0]; g.appendChild(n);
+    for (var i = 0; i < 6; i++) {
+      var cell = document.createElement("span");
+      if (i >= c[1] && i <= c[2]) { cell.className = "bar" + (i >= c[3] && i <= c[4] ? " peak" : ""); cell.title = c[0] + ", " + months[i]; }
+      g.appendChild(cell);
+    }
+  });
+
+  var fmt = function (n) { return "$" + Math.round(n).toLocaleString("en-CA"); };
+  function calc() {
+    var share = parseFloat(document.querySelector("input[name=share]:checked").value);
+    var hw = 640 * share;
+    document.getElementById("hw").textContent = Math.round(hw) + " lb";
+    document.getElementById("bp").textContent = fmt(hw * 6.25);
+    document.getElementById("cw").textContent = fmt(hw * 1.2);
+    document.getElementById("tot").textContent = fmt(hw * 7.45);
+    document.getElementById("take").textContent = "about " + Math.round(hw * 0.62) + " lb";
+  }
+  document.querySelectorAll("input[name=share]").forEach(function (r) { r.addEventListener("change", calc); });
+  calc();
+
+  document.getElementById("contact").addEventListener("submit", function (e) { e.preventDefault(); document.getElementById("sent").hidden = false; });
+})();
+</script>
+
+</body></html>

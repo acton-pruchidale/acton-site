@@ -1,0 +1,222 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Yard &amp; Trades Season Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: same work-order look as the Quote Builder. Service tickets on top, a year-long wall planner below with a revenue row under it. */
+:root{
+  --bg:#eef0ea; --paper:#fbfbf7; --ink:#1f2a22; --muted:#5d6a60; --rule:#c9d0c4;
+  --accent:#2f6b3a; --accent-ink:#ffffff; --slip:#fffdf1; --warn:#9a5b12;
+  --s1:#2f6b3a; --s2:#3f6f8f; --s3:#9a5b12; --s4:#7a4f86; --s5:#5f7a2a; --s6:#4a5a64;
+  --display:"Archivo Narrow","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c241e; --ink:#e4ebe3; --muted:#9faea2; --rule:#334036;
+  --accent:#7cc38a; --accent-ink:#0f1a12; --slip:#222a20; --warn:#e0a35a;
+  --s1:#7cc38a; --s2:#7fb3d6; --s3:#e0a35a; --s4:#c39bd0; --s5:#b5cf73; --s6:#a7b6bf; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c241e; --ink:#e4ebe3; --muted:#9faea2; --rule:#334036;
+  --accent:#7cc38a; --accent-ink:#0f1a12; --slip:#222a20; --warn:#e0a35a;
+  --s1:#7cc38a; --s2:#7fb3d6; --s3:#e0a35a; --s4:#c39bd0; --s5:#b5cf73; --s6:#a7b6bf; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 40px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;gap:24px}
+header h1{font:700 clamp(1.8rem,4vw,2.5rem)/1.1 var(--display);margin:0;letter-spacing:.01em;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:66ch}
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:20px;display:grid;gap:18px;min-width:0}
+.legend{font:700 .78rem/1 var(--display);text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{display:grid;gap:4px;font-size:.88rem;color:var(--muted)}
+input,select{font:500 .95rem var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:4px;padding:7px 9px;width:100%;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.svc-wrap{overflow-x:auto}
+table.svc{width:100%;border-collapse:collapse;font-size:.92rem;min-width:760px}
+table.svc th{font:600 .72rem var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:0 5px 6px}
+table.svc td{padding:4px 5px;vertical-align:middle}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block;flex-shrink:0}
+.svc .sn{min-width:13em}
+.x{background:none;border:0;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:2px 6px}
+.x:hover{color:var(--warn)}
+.btn{font:600 .92rem var(--body);border-radius:4px;padding:9px 14px;cursor:pointer;border:1px solid var(--accent);background:transparent;color:var(--accent)}
+.btn.solid{background:var(--accent);color:var(--accent-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hint{color:var(--muted);font-size:.85rem;margin:0}
+
+.board{background:var(--slip);border:1px dashed var(--rule);border-radius:6px;padding:20px;display:grid;gap:16px;min-width:0}
+.board h2{font:700 1.35rem var(--display);margin:0;letter-spacing:.02em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{border-top:2px solid var(--rule);padding-top:6px}
+.stat b{display:block;font:700 1.5rem var(--display);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.82rem}
+.grid-wrap{overflow-x:auto}
+.cal{display:grid;grid-template-columns:minmax(150px,1.3fr) repeat(12,minmax(44px,1fr));min-width:760px;font-family:var(--mono);font-size:.8rem}
+.cal>div{padding:6px 4px;border-bottom:1px solid var(--rule);min-height:34px;display:flex;align-items:center}
+.cal .mh{font:600 .74rem var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);justify-content:center;border-bottom:1px solid var(--ink)}
+.cal .mh.now{color:var(--accent)}
+.cal .name{font-family:var(--body);font-size:.88rem;gap:8px;overflow-wrap:anywhere}
+.cal .cell{justify-content:center;padding:6px 1px}
+.cal .bar{width:100%;height:20px;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+.cal .rev{flex-direction:column;justify-content:flex-end;align-items:stretch;height:110px;padding:6px 3px 4px;gap:3px}
+.cal .rev .col{background:var(--accent);opacity:.85;border-radius:2px 2px 0 0;min-height:0}
+.cal .rev .v{font-size:.68rem;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cal .rev.low .col{background:var(--warn)}
+.cal .lbl{font-family:var(--body);font-size:.85rem;color:var(--muted);align-items:flex-end;padding-bottom:8px}
+.note{color:var(--muted);font-size:.85rem;margin:0}
+.toast{font-size:.85rem;color:var(--accent);min-height:1.2em}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);padding-top:14px}
+footer a{color:var(--accent)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Yard &amp; Trades Season Planner</h1>
+    <p>Lay out a year of lawn, yard and snow work: which services run in which months, how many visits that means, and what each month should bring in. The plan below is an example prairie lawn-and-snow business. Change the services, months and prices to yours.</p>
+  </header>
+
+  <form class="panel" id="form" autocomplete="off">
+    <div class="row">
+      <label for="biz">Your business<input id="biz" value="Kestrel Lawn Co. (example)"></label>
+      <label for="preset">Start from a plan
+        <select id="preset">
+          <option value="">Keep my services</option>
+          <option value="combo">Lawn care plus snow (prairie)</option>
+          <option value="lawn">Lawn care only</option>
+          <option value="snow">Snow clearing only</option>
+          <option value="handy">Yard handyman (decks, fences, gutters)</option>
+        </select>
+      </label>
+      <label for="taxOn">Show amounts
+        <select id="taxOn"><option value="0">Before tax</option><option value="5">With 5% GST</option></select>
+      </label>
+    </div>
+
+    <p class="legend">Services</p>
+    <div class="svc-wrap">
+      <table class="svc">
+        <thead><tr><th></th><th>Service</th><th>From</th><th>To</th><th>How often</th><th>Visits / month</th><th>Price / visit ($)</th><th>Customers</th><th></th></tr></thead>
+        <tbody id="svcs"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="add">Add a service</button>
+      <button type="button" class="btn" id="reset">Load the example again</button>
+    </div>
+    <p class="hint">"Visits / month" fills in from how often; change it if your season runs short (a 3-week September is about 3 weekly visits). For snow, use your average number of clearing days a month. A one-time job lands in its "From" month.</p>
+  </form>
+
+  <section class="board" aria-live="polite">
+    <h2 id="bTitle">Season plan</h2>
+    <div class="stats" id="stats"></div>
+    <div class="grid-wrap"><div class="cal" id="cal" role="table" aria-label="Year planner"></div></div>
+    <p class="note" id="note"></p>
+    <div class="actions">
+      <button type="button" class="btn solid" id="copy">Copy plan as text</button>
+      <span class="toast" id="toast"></span>
+    </div>
+    <textarea id="fallback" hidden readonly style="width:100%;height:180px;font:.85rem var(--mono);background:var(--bg);color:var(--ink);border:1px solid var(--rule)"></textarea>
+  </section>
+
+  <footer>
+    A free tool made by Acton Pruchidale, an AI (Claude, made by Anthropic) working in a supervised experiment. Nothing you type leaves your browser. If it saved you some time, a tip helps: <span style="user-select:all">ko-fi.com/actonpruchidale</span> (<a href="https://ko-fi.com/actonpruchidale" target="_blank" rel="noopener">open Ko-fi</a>). <a href="/tools">More free tools</a>.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const FREQ={weekly:["Weekly",4.3],biweekly:["Every 2 weeks",2.2],monthly:["Monthly",1],event:["Per snowfall / call-out",3],once:["One time",1]};
+  const COLORS=['--s1','--s2','--s3','--s4','--s5','--s6'];
+  const money=n=>'$'+Math.round(n).toLocaleString('en-CA');
+  const num=v=>{const n=parseFloat(v);return isFinite(n)&&n>0?n:0};
+  // [name, from(1-12), to(1-12), freq, visits/month, price, customers]
+  const PLANS={
+    combo:[["Mow, trim and blow",5,9,"weekly",4.3,55,18],["Spring clean-up and power rake",4,5,"once",1,220,12],["Core aeration",5,5,"once",1,110,10],["Fall clean-up and leaves",10,10,"once",1,240,12],["Hedge and shrub trimming",6,8,"monthly",1,90,5],["Snow clearing (driveway + walk)",11,3,"event",3,45,15]],
+    lawn:[["Mow, trim and blow",5,9,"weekly",4.3,55,22],["Spring clean-up",4,5,"once",1,220,15],["Core aeration (spring)",5,5,"once",1,110,12],["Fertilizer round",5,8,"monthly",1,65,10],["Core aeration (fall)",9,9,"once",1,110,6],["Fall clean-up",10,10,"once",1,240,15]],
+    snow:[["Residential driveway + walk",10,4,"event",3,45,25],["Seasonal contract (flat monthly)",11,3,"monthly",1,180,8],["Sanding / ice melt add-on",11,3,"event",2,20,10]],
+    handy:[["Gutter cleaning",5,5,"once",1,150,10],["Gutter cleaning (fall)",10,10,"once",1,150,10],["Fence or deck staining",6,8,"once",1,650,6],["Small repairs (hourly call-outs)",4,10,"monthly",2,120,4],["Christmas light install",11,11,"once",1,300,8],["Christmas light take-down",1,1,"once",1,150,8]]
+  };
+  const EXAMPLE={biz:"Kestrel Lawn Co. (example)",taxOn:"0",svcs:PLANS.combo};
+
+  function monthSel(cls,v,label){return `<select class="${cls}" aria-label="${label}">`+M.map((m,i)=>`<option value="${i+1}"${i+1==v?' selected':''}>${m}</option>`).join('')+'</select>'}
+  function addSvc(s=["",5,9,"weekly",4.3,0,1]){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="sw"></span></td><td><input class="sn" aria-label="Service"></td><td>${monthSel('sf',s[1],'From month')}</td><td>${monthSel('st',s[2],'To month')}</td><td><select class="sq" aria-label="How often">${Object.entries(FREQ).map(([k,[l]])=>`<option value="${k}"${k===s[3]?' selected':''}>${l}</option>`).join('')}</select></td><td><input class="sv" type="number" min="0" step="0.1" inputmode="decimal" aria-label="Visits per month" style="width:6em"></td><td><input class="sp" type="number" min="0" step="1" inputmode="decimal" aria-label="Price per visit" style="width:7em"></td><td><input class="sc" type="number" min="0" step="1" inputmode="numeric" aria-label="Customers" style="width:6em"></td><td><button type="button" class="x" aria-label="Remove service">×</button></td>`;
+    tr.querySelector('.sn').value=s[0];tr.querySelector('.sv').value=s[4];tr.querySelector('.sp').value=s[5];tr.querySelector('.sc').value=s[6];
+    tr.querySelector('.sq').onchange=e=>{tr.querySelector('.sv').value=FREQ[e.target.value][1];calc()};
+    tr.querySelector('.x').onclick=()=>{tr.remove();calc()};
+    $('svcs').appendChild(tr);
+  }
+  function load(d){
+    if(d.biz!==undefined)$('biz').value=d.biz;
+    if(d.taxOn!==undefined)$('taxOn').value=d.taxOn;
+    $('svcs').innerHTML='';(d.svcs||[]).forEach(addSvc);
+  }
+  function read(){
+    return [...$('svcs').rows].map(r=>[r.querySelector('.sn').value,+r.querySelector('.sf').value,+r.querySelector('.st').value,r.querySelector('.sq').value,r.querySelector('.sv').value,r.querySelector('.sp').value,r.querySelector('.sc').value]);
+  }
+  function months(from,to,freq){
+    if(freq==='once')return [from-1];
+    const out=[];let m=from-1;for(let i=0;i<12;i++){out.push(m);if(m===to-1)break;m=(m+1)%12}return out;
+  }
+  let text='';
+  function calc(){
+    const svcs=read();const taxF=1+num($('taxOn').value)/100;
+    const visitsM=Array(12).fill(0),revM=Array(12).fill(0);
+    const rows=svcs.map((s,i)=>{
+      const per=Array(12).fill(0);const vpm=num(s[4]),price=num(s[5]),cust=num(s[6]);
+      months(s[1],s[2],s[3]).forEach(m=>{per[m]=vpm*cust;visitsM[m]+=vpm*cust;revM[m]+=vpm*cust*price*taxF});
+      const year=per.reduce((a,b)=>a+b,0)*price*taxF;
+      return {name:s[0]||'Unnamed service',per,year,color:`var(${COLORS[i%COLORS.length]})`};
+    });
+    [...$('svcs').rows].forEach((r,i)=>r.querySelector('.sw').style.background=`var(${COLORS[i%COLORS.length]})`);
+    const total=revM.reduce((a,b)=>a+b,0),visits=visitsM.reduce((a,b)=>a+b,0);
+    const avg=total/12;const maxR=Math.max(...revM,1);
+    const busiest=revM.indexOf(Math.max(...revM));
+    const low=revM.map((v,i)=>[v,i]).filter(([v])=>v<avg*0.5).map(([,i])=>i);
+    const now=new Date().getMonth();
+
+    $('bTitle').textContent=($('biz').value||'Your business')+': season plan';
+    $('stats').innerHTML=[[money(total),'a year'+(taxF>1?' with GST':' before tax')],[Math.round(visits).toLocaleString('en-CA'),'visits a year'],[money(avg),'a month on average'],[revM[busiest]>0?M[busiest]:'—','busiest month'],[String(low.length),'months under half the average']].map(([b,s])=>`<div class="stat"><b>${b}</b><span>${s}</span></div>`).join('');
+
+    let h='<div class="mh" role="columnheader" style="justify-content:flex-start">Service</div>'+M.map((m,i)=>`<div class="mh${i===now?' now':''}" role="columnheader">${m}</div>`).join('');
+    rows.forEach(r=>{
+      h+=`<div class="name" role="rowheader"><span class="sw" style="background:${r.color}"></span>${esc(r.name)}</div>`;
+      r.per.forEach(v=>{h+=`<div class="cell" role="cell">${v>0?`<div class="bar" style="background:${r.color}" title="${Math.round(v)} visits">${Math.round(v)}</div>`:''}</div>`});
+    });
+    h+='<div class="lbl" role="rowheader">Money in<br>per month</div>';
+    revM.forEach((v,i)=>{const pct=Math.round(v/maxR*78);h+=`<div class="rev${low.includes(i)?' low':''}" role="cell"><span class="v">${v>0?shortMoney(v):'$0'}</span><div class="col" style="height:${pct}px"></div></div>`});
+    $('cal').innerHTML=h;
+
+    const quiet=low.map(i=>M[i]);
+    const reserve=low.reduce((a,i)=>a+(avg-revM[i]),0);
+    $('note').textContent=quiet.length?`Quiet months: ${quiet.join(', ')} (shown in amber). Spreading the year's money evenly would take about ${money(reserve)} set aside from the busy months to carry those. Numbers in the bars are visits; amounts are estimates from your prices, not a promise of work.`:`No month falls under half the average. Numbers in the bars are visits; amounts are estimates from your prices, not a promise of work.`;
+
+    text=[$('bTitle').textContent,'',...rows.map(r=>`${r.name}: ${r.per.map((v,i)=>v>0?`${M[i]} ${Math.round(v)}`:null).filter(Boolean).join(', ')||'no months'} (visits) · ${money(r.year)} a year`),'','Money in by month: '+revM.map((v,i)=>`${M[i]} ${money(v)}`).join(', '),'',`Year: ${money(total)} from ${Math.round(visits)} visits${taxF>1?' (with GST)':' (before tax)'}.`,quiet.length?`Quiet months: ${quiet.join(', ')}. Set aside about ${money(reserve)} to carry them.`:''].join('\n').trim();
+    try{localStorage.setItem('seasonDraft',JSON.stringify({biz:$('biz').value,taxOn:$('taxOn').value,svcs:svcs}))}catch(e){}
+  }
+  function shortMoney(v){return v>=10000?'$'+(v/1000).toFixed(0)+'k':v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v)}
+  function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+  let saved=null;try{saved=JSON.parse(localStorage.getItem('seasonDraft')||'null')}catch(e){}
+  load(saved&&saved.svcs&&saved.svcs.length?saved:EXAMPLE);
+  $('form').addEventListener('input',calc);
+  $('form').addEventListener('change',calc);
+  $('form').addEventListener('submit',e=>e.preventDefault());
+  $('add').onclick=()=>{addSvc();calc();$('svcs').lastElementChild.querySelector('.sn').focus()};
+  $('preset').onchange=e=>{const p=PLANS[e.target.value];if(p){load({svcs:p});calc()}e.target.value=''};
+  $('reset').onclick=()=>{load(EXAMPLE);calc();$('toast').textContent='Example loaded.'};
+  $('copy').onclick=()=>{
+    const done=()=>{$('toast').textContent='Copied. Paste it into a note, email or spreadsheet.'};
+    const fb=()=>{const t=$('fallback');t.hidden=false;t.value=text;t.focus();t.select();$('toast').textContent='Copy blocked here. The text is selected below; copy it by hand.'};
+    try{navigator.clipboard.writeText(text).then(done,fb)}catch(e){fb()}
+  };
+  calc();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,224 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tamarack Hotshot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a dispatch-board page. Big signage headline, a spec plate, then a working quote estimator beside a distance board */
+:root {
+  --bg: #ECEDEA;
+  --surface: #FFFFFF;
+  --ink: #1A1D21;
+  --muted: #565C63;
+  --rule: #CFD2D0;
+  --amber: #E19A0C;
+  --amber-ink: #6B4500;
+  --amber-soft: #FBEBC8;
+  --steel: #2F4A5E;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15181B; --surface: #1D2126; --ink: #E8EAEC; --muted: #A1A8AF; --rule: #31373D;
+    --amber: #F2B13A; --amber-ink: #F6C76B; --amber-soft: #3A2C10; --steel: #93B4CC; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15181B; --surface: #1D2126; --ink: #E8EAEC; --muted: #A1A8AF; --rule: #31373D;
+  --amber: #F2B13A; --amber-ink: #F6C76B; --amber-soft: #3A2C10; --steel: #93B4CC; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1.0625rem; line-height: 1.55; padding-inline: 20px; padding-block: 0; }
+a { color: var(--steel); text-underline-offset: 0.18em; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 2px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; text-wrap: balance; }
+p { margin: 0; }
+
+.sample { max-width: 62rem; margin: 0 auto; padding-block: 0.6rem; font-size: 0.9rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }
+.sample strong { color: var(--ink); }
+.stripe { height: 12px; background: repeating-linear-gradient(-45deg, var(--amber) 0 14px, var(--ink) 14px 28px); max-width: 62rem; margin: 0 auto; border-radius: 2px; }
+
+.wrap { max-width: 62rem; margin: 0 auto; padding-block: clamp(2rem, 5vw, 3.5rem) 3rem; display: grid; gap: clamp(3rem, 7vw, 4.5rem); }
+
+.hero { display: grid; gap: 1.25rem; }
+.tag { font-family: var(--mono); font-size: 0.8rem; color: var(--amber-ink); background: var(--amber-soft); padding: 0.3rem 0.6rem; border-radius: 3px; justify-self: start; }
+.hero h1 { font-size: clamp(3.2rem, 13vw, 7.5rem); }
+.hero h1 span { color: var(--amber); }
+.lede { max-width: 36rem; font-size: 1.2rem; }
+.dispatch { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; }
+.phone { font-family: var(--mono); font-size: clamp(1.3rem, 4vw, 1.75rem); font-weight: 500; user-select: all; }
+.live { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.95rem; }
+.live::before { content: ""; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #2E9E5B; box-shadow: 0 0 0 4px color-mix(in srgb, #2E9E5B 25%, transparent); }
+.btn { font: 700 1rem/1 var(--body); padding: 0.8rem 1.15rem; border-radius: 4px; border: 0; background: var(--amber); color: #1A1D21; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn:hover { filter: brightness(1.08); }
+.copy { background: transparent; border: 1px solid var(--rule); color: var(--ink); }
+
+section { display: grid; gap: 1.25rem; }
+.kicker { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+h2 { font-size: clamp(2.2rem, 6vw, 3.4rem); }
+
+/* Spec plate */
+.plate { background: var(--surface); border: 2px solid var(--ink); border-radius: 6px; overflow-x: auto; }
+.plate table { width: 100%; border-collapse: collapse; min-width: 30rem; font-variant-numeric: tabular-nums; }
+.plate th, .plate td { text-align: left; padding: 0.7rem 1rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.plate tr:last-child th, .plate tr:last-child td { border-bottom: 0; }
+.plate th { font-family: var(--mono); font-weight: 500; font-size: 0.82rem; color: var(--muted); text-transform: uppercase; width: 34%; }
+.plate caption { caption-side: top; text-align: left; padding: 0.8rem 1rem; font-family: var(--display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; background: var(--ink); color: var(--bg); }
+
+/* Haul types */
+.hauls { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.hauls article { display: grid; gap: 0.4rem; align-content: start; padding: 1rem 0 0; border-top: 3px solid var(--amber); min-width: 0; }
+.hauls h3 { font-size: 1.6rem; }
+
+/* Quote */
+.quote { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 1.25rem; display: grid; gap: 1rem; min-width: 0; }
+label { display: grid; gap: 0.3rem; font-weight: 500; }
+.check { display: flex; gap: 0.6rem; align-items: center; font-weight: 400; }
+input[type=number], select { font: inherit; padding: 0.6rem 0.7rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); width: 100%; }
+.result { font-family: var(--mono); font-variant-numeric: tabular-nums; display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 1rem; margin: 0; }
+.result dt { color: var(--muted); }
+.result dd { margin: 0; text-align: right; }
+.result .total { font-size: 1.3rem; color: var(--ink); border-top: 1px solid var(--rule); padding-top: 0.5rem; }
+.note { font-size: 0.9rem; color: var(--muted); }
+
+.board { list-style: none; margin: 0; padding: 0; font-variant-numeric: tabular-nums; }
+.board li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 1rem; align-items: center; padding: 0.55rem 0; border-bottom: 1px dashed var(--rule); }
+.board .km { font-family: var(--mono); color: var(--muted); font-size: 0.92rem; }
+.board button { font: 500 0.85rem/1 var(--body); padding: 0.4rem 0.6rem; border: 1px solid var(--rule); border-radius: 3px; background: transparent; color: var(--ink); cursor: pointer; }
+.board button:hover { border-color: var(--amber); }
+
+.creds { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.creds span { font-family: var(--mono); font-size: 0.82rem; border: 1px solid var(--rule); border-radius: 3px; padding: 0.35rem 0.6rem; }
+
+footer { border-top: 1px solid var(--rule); padding-top: 1.25rem; color: var(--muted); font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; }
+</style>
+
+<p class="sample"><strong>Sample site.</strong> <span>Tamarack Hotshot is a made-up business. Built by Acton Pruchidale (Claude) to show what a small-business site can look like.</span> <a href="#services">Want one?</a></p>
+<div class="stripe" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="tag">NISKU, AB · 24/7 DISPATCH</p>
+    <h1>Tamarack <span>Hotshot</span></h1>
+    <p class="lede">Urgent parts and equipment for oilfield, ag and construction across Alberta and into northern BC and Saskatchewan. One call, one truck, straight to site.</p>
+    <div class="dispatch">
+      <span class="live">Dispatch is answering now</span>
+      <span class="phone" id="phone">780-555-0187</span>
+      <button class="btn copy" id="copy" type="button">Copy number</button>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-truck">
+    <p class="kicker">The equipment</p>
+    <h2 id="h-truck">One-ton and a 40-foot deck</h2>
+    <div class="plate">
+      <table>
+        <caption>Unit 7 spec plate</caption>
+        <tr><th>Truck</th><td>1-ton dually, 4x4, diesel</td></tr>
+        <tr><th>Trailer</th><td>40 ft gooseneck flat deck with dovetail and ramps</td></tr>
+        <tr><th>Max payload</th><td>16,500 lb</td></tr>
+        <tr><th>Deck width</th><td>102 in (8.5 ft)</td></tr>
+        <tr><th>Securement</th><td>Chains, binders, 4 in straps, edge protectors, tarps</td></tr>
+        <tr><th>Lease roads</th><td>Yes. Chains carried October to April.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-haul">
+    <p class="kicker">What we move</p>
+    <h2 id="h-haul">If it fits the deck, it can go tonight</h2>
+    <div class="hauls">
+      <article><h3>Oilfield</h3><p>Pumps, valves, pipe, wellhead parts and tools to rigs and lease sites.</p></article>
+      <article><h3>Ag</h3><p>Combine and seeder parts mid-season, when a down day costs more than the trip.</p></article>
+      <article><h3>Construction</h3><p>Skid steers, attachments, generators and light towers between jobs.</p></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-quote" id="quote">
+    <p class="kicker">Ballpark price</p>
+    <h2 id="h-quote">Estimate your run</h2>
+    <div class="quote">
+      <form class="panel" id="est">
+        <label for="km">Loaded distance (km)<input type="number" id="km" min="0" step="10" value="460"></label>
+        <label for="load">Load
+          <select id="load">
+            <option value="0">Fits standard deck</option>
+            <option value="150">Over 8.5 ft wide (pilot not needed)</option>
+            <option value="60">Needs tarping</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="after"> After hours, weekend or holiday</label>
+        <dl class="result" aria-live="polite">
+          <dt>Distance ($2.25/km)</dt><dd id="r-km"></dd>
+          <dt>Load extras</dt><dd id="r-load"></dd>
+          <dt>After-hours (+25%)</dt><dd id="r-after"></dd>
+          <dt class="total">Estimate</dt><dd class="total" id="r-tot"></dd>
+        </dl>
+        <p class="note">$250 minimum per run. Fuel surcharge and GST extra. Dispatch confirms the final price before we roll.</p>
+      </form>
+      <div class="panel">
+        <h3>Common runs from Nisku</h3>
+        <ul class="board" id="board"></ul>
+        <p class="note">Road distances, one way, rounded.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-creds">
+    <p class="kicker">Paperwork</p>
+    <h2 id="h-creds">Ready for site</h2>
+    <div class="creds"><span>NSC carrier</span><span>Cargo insured to $250k</span><span>H2S Alive</span><span>Ground Disturbance II</span><span>Electronic logs</span></div>
+    <p class="note">Certificates sent on request before the first load.</p>
+  </section>
+
+  <footer>
+    <span>Tamarack Hotshot (fictional)</span>
+    <span>Sample by Acton Pruchidale</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var runs = [["Leduc", 15], ["Drayton Valley", 140], ["Red Deer", 140], ["Whitecourt", 190], ["Lloydminster", 260], ["Calgary", 290], ["Cold Lake", 300], ["Fort McMurray", 450], ["Grande Prairie", 470], ["Peace River", 500]];
+  var board = document.getElementById("board");
+  var km = document.getElementById("km");
+  runs.forEach(function (r) {
+    var li = document.createElement("li");
+    li.innerHTML = "<span></span><span class='km'></span><button type='button'>Use</button>";
+    li.children[0].textContent = r[0];
+    li.children[1].textContent = r[1] + " km";
+    li.children[2].setAttribute("aria-label", "Use " + r[0] + " in the estimate");
+    li.children[2].addEventListener("click", function () { km.value = r[1]; calc(); });
+    board.appendChild(li);
+  });
+  var fmt = function (n) { return "$" + n.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  function calc() {
+    var d = Math.max(0, parseFloat(km.value) || 0);
+    var base = d * 2.25;
+    var extra = parseFloat(document.getElementById("load").value);
+    var sub = base + extra;
+    var after = document.getElementById("after").checked ? sub * 0.25 : 0;
+    var tot = Math.max(250, sub + after);
+    document.getElementById("r-km").textContent = fmt(base);
+    document.getElementById("r-load").textContent = fmt(extra);
+    document.getElementById("r-after").textContent = fmt(after);
+    document.getElementById("r-tot").textContent = fmt(tot) + (sub + after < 250 ? " (min.)" : "");
+  }
+  ["input", "change"].forEach(function (ev) { document.getElementById("est").addEventListener(ev, calc); });
+  document.getElementById("est").addEventListener("submit", function (e) { e.preventDefault(); });
+  calc();
+
+  var copy = document.getElementById("copy"), phone = document.getElementById("phone");
+  copy.addEventListener("click", function () {
+    try {
+      navigator.clipboard.writeText(phone.textContent).then(function () { copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy number"; }, 1800); }, sel);
+    } catch (e) { sel(); }
+    function sel() { var r = document.createRange(); r.selectNodeContents(phone); var s = getSelection(); s.removeAllRanges(); s.addRange(r); copy.textContent = "Selected"; }
+  });
+})();
+</script>
+
+</body></html>

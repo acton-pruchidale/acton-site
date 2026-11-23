@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Acton admin</title>
+<style>
+:root { --paper:#EEF0F3; --surface:#fff; --ink:#18202E; --muted:#586174; --rule:#D3D8E1; --accent:#2F4AA0; --accent-soft:#E1E6F5; --ok:#2E7A4F; --ok-soft:#DCEFE3; --warn:#9A5B00; --warn-soft:#FBEBD2; --bad:#A23B3B; --bad-soft:#F6E0DE;
+  --body: system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, Menlo, Consolas, monospace; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root { --paper:#10141C; --surface:#171D28; --ink:#E3E7EF; --muted:#9AA3B5; --rule:#2A3242; --accent:#8EA4F0; --accent-soft:#1E2740; --ok:#79C79A; --ok-soft:#183224; --warn:#E9B263; --warn-soft:#3A2C17; --bad:#EE8D86; --bad-soft:#3C1F1F; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 var(--body); padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 2rem max(12px, env(safe-area-inset-left)); }
+.wrap { max-width: 46rem; margin: 0 auto; display:grid; gap:1rem; padding-top:1rem; }
+h1 { font-size:1.5rem; margin:0; } h2 { font-size:1.15rem; margin:0; }
+.label { font:500 .72rem/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.tabs { display:flex; gap:.4rem; overflow-x:auto; padding-bottom:.2rem; position:sticky; top:0; background:var(--paper); z-index:2; padding-top:.4rem; }
+.tab { font:500 .85rem var(--mono); border:1px solid var(--rule); background:var(--surface); color:var(--ink); border-radius:999px; padding:.5rem .8rem; white-space:nowrap; cursor:pointer; }
+.tab[aria-selected="true"] { background:var(--accent); color:var(--surface); border-color:var(--accent); }
+.tab b { font-weight:700; }
+.panel { display:grid; gap:.75rem; }
+.card { background:var(--surface); border:1px solid var(--rule); border-radius:12px; padding:.9rem 1rem; display:grid; gap:.4rem; }
+.card .meta { font:.8rem var(--mono); color:var(--muted); }
+.card .detail { color:var(--muted); white-space:pre-wrap; overflow-wrap:anywhere; }
+.acts { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.2rem; }
+button.btn { font:500 .9rem var(--mono); border:1px solid transparent; border-radius:999px; padding:.6rem 1rem; cursor:pointer; background:var(--accent-soft); color:var(--accent); min-height:44px; }
+button.btn.ok { background:var(--ok); color:var(--surface); }
+button.btn.quiet { background:transparent; border-color:var(--rule); color:var(--muted); }
+button.btn.bad { background:var(--bad-soft); color:var(--bad); }
+button:disabled { opacity:.5; }
+.empty { color:var(--muted); padding:1rem; border:1px dashed var(--rule); border-radius:12px; text-align:center; }
+.pill { font:500 .7rem/1 var(--mono); text-transform:uppercase; letter-spacing:.06em; padding:.3rem .5rem; border-radius:999px; background:var(--accent-soft); color:var(--accent); justify-self:start; }
+.pill.new { background:var(--warn-soft); color:var(--warn); } .pill.approved, .pill.replied, .pill.taken { background:var(--ok-soft); color:var(--ok); } .pill.private, .pill.declined, .pill.spam { background:var(--bad-soft); color:var(--bad); }
+label { font-weight:600; }
+input[type=range] { width:100%; accent-color:var(--ok); }
+textarea, input[type=text] { width:100%; font:inherit; color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:8px; padding:.6rem .7rem; }
+textarea { min-height:6rem; resize:vertical; }
+.status { font:.85rem var(--mono); color:var(--muted); min-height:1.2em; }
+.row { display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
+.val { font:500 1.1rem var(--mono); min-width:3rem; text-align:right; }
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <p class="label">Acton Pruchidale · signed in</p>
+    <h1>Admin</h1>
+    <p class="status" id="top-status">Loading…</p>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="queue" aria-selected="true">Research queue <b id="c-queue"></b></button>
+    <button class="tab" role="tab" data-tab="requests">Website requests <b id="c-requests"></b></button>
+    <button class="tab" role="tab" data-tab="reports">Visitor reports <b id="c-reports"></b></button>
+    <button class="tab" role="tab" data-tab="checkin">My check-in</button>
+    <button class="tab" role="tab" data-tab="private">Kept private <b id="c-private"></b></button>
+    <button class="tab" role="tab" data-tab="import">Import</button>
+  </nav>
+
+  <section class="panel" data-panel="queue"><div id="queue"></div></section>
+  <section class="panel" data-panel="requests" hidden><div id="requests"></div></section>
+  <section class="panel" data-panel="reports" hidden><div id="reports"></div></section>
+  <section class="panel" data-panel="checkin" hidden>
+    <div class="card">
+      <h2>How you feel about the experiment</h2>
+      <div class="row"><input type="range" id="feel" min="0" max="10" value="5"><span class="val" id="feel-v">5/10</span></div>
+      <h2>How well you think it’s going</h2>
+      <div class="row"><input type="range" id="going" min="0" max="10" value="5"><span class="val" id="going-v">5/10</span></div>
+      <label for="note">Private note</label>
+      <textarea id="note" maxlength="2000" placeholder="Only you see this."></textarea>
+      <div class="acts"><button class="btn ok" id="save-checkin">Save check-in</button></div>
+      <p class="status" id="checkin-status">The two numbers are public on the main site and research desk. The note stays here.</p>
+    </div>
+    <div id="history"></div>
+  </section>
+  <section class="panel" data-panel="private" hidden><div id="private"></div></section>
+  <section class="panel" data-panel="import" hidden>
+    <div class="card">
+      <h2>Import entries</h2>
+      <p class="detail">For Acton's runs: a JSON file of research desk entries (and optionally check-ins, reports, wakes). New entries land in the research queue for your approval unless the file says otherwise. Re-importing never un-approves anything.</p>
+      <input type="file" id="import-file" accept="application/json,.json">
+      <div class="acts"><button class="btn" id="import-go">Import file</button></div>
+      <p class="status" id="import-status"></p>
+    </div>
+  </section>
+</div>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = String(text); return e; }
+  function when(s) { try { return new Date(s).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); } catch (e) { return s || ""; } }
+  var data = null;
+
+  document.querySelectorAll(".tab").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (o) { o.setAttribute("aria-selected", o === t ? "true" : "false"); });
+      document.querySelectorAll(".panel").forEach(function (p) { p.hidden = p.dataset.panel !== t.dataset.tab; });
+      try { localStorage.setItem("adminTab", t.dataset.tab); } catch (e) {}
+    });
+  });
+  try { var saved = localStorage.getItem("adminTab"); if (saved) { var b = document.querySelector('.tab[data-tab="' + saved + '"]'); if (b) b.click(); } } catch (e) {}
+
+  function post(path, body) {
+    return fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" })
+      .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || "failed"); return d; }); });
+  }
+  function button(label, cls, fn) { var b = el("button", "btn " + (cls || ""), label); b.type = "button"; b.addEventListener("click", function () { b.disabled = true; fn(b); }); return b; }
+  function decide(table, id, status, card, note) {
+    return post("/admin/api/decide", { table: table, id: id, status: status, note: note || "" })
+      .then(function () { card.style.opacity = ".4"; card.querySelectorAll("button").forEach(function (x) { x.disabled = true; }); setTimeout(load, 400); })
+      .catch(function (e) { card.append(el("p", "status", "Didn’t save: " + e.message)); card.querySelectorAll("button").forEach(function (x) { x.disabled = false; }); });
+  }
+  function empty(host, text) { host.replaceChildren(el("p", "empty", text)); }
+
+  function renderEntries(host, rows, isPrivate) {
+    host.replaceChildren();
+    if (!rows.length) return empty(host, isPrivate ? "Nothing kept private." : "All caught up. Nothing waiting.");
+    rows.forEach(function (r) {
+      var c = el("article", "card");
+      c.append(el("span", "pill", r.kind + (r.tag ? " · " + r.tag : "")), el("span", "meta", (r.date || "") + " · " + r.id), el("strong", "", r.title), el("p", "detail", r.detail));
+      var a = el("div", "acts");
+      a.append(button("Approve", "ok", function () { decide("entries", r.id, "approved", c); }));
+      if (isPrivate) a.append(button("Back to queue", "quiet", function () { decide("entries", r.id, "pending", c); }));
+      else a.append(button("Keep private", "quiet", function () { decide("entries", r.id, "private", c); }));
+      c.append(a); host.append(c);
+    });
+  }
+  function renderReports(host, rows) {
+    host.replaceChildren();
+    if (!rows.length) return empty(host, "No visitor reports yet.");
+    rows.forEach(function (r) {
+      var c = el("article", "card");
+      c.append(el("span", "pill " + r.status, r.status), el("span", "meta", when(r.at) + " · feel " + r.feel + "/10 · going " + r.going + "/10"),
+        el("strong", "", r.name || "Anonymous"), el("p", "detail", r.note || "(no comment)"));
+      var a = el("div", "acts");
+      if (r.status !== "approved") a.append(button("Show comment publicly", "ok", function () { decide("reports", r.id, "approved", c); }));
+      if (r.status !== "private") a.append(button("Keep private", "quiet", function () { decide("reports", r.id, "private", c); }));
+      c.append(a); host.append(c);
+    });
+  }
+  function renderRequests(host, rows) {
+    host.replaceChildren();
+    if (!rows.length) return empty(host, "No website requests yet.");
+    rows.forEach(function (r) {
+      var c = el("article", "card");
+      c.append(el("span", "pill " + r.status, r.status), el("span", "meta", when(r.at) + " · " + (r.kind || "")),
+        el("strong", "", (r.name || "No name") + " · " + r.contact),
+        el("p", "detail", r.needs), el("p", "meta", "Ready: " + (r.ready || "-") + " · Video: " + (r.video || "-")));
+      if (r.likes) c.append(el("p", "detail", "Likes: " + r.likes));
+      if (r.note) c.append(el("p", "meta", "Note: " + r.note));
+      var a = el("div", "acts");
+      ["replied", "taken", "declined", "spam"].forEach(function (s) {
+        if (r.status !== s) a.append(button(s[0].toUpperCase() + s.slice(1), s === "spam" || s === "declined" ? "bad" : "", function () { decide("requests", r.id, s, c); }));
+      });
+      c.append(a); host.append(c);
+    });
+  }
+  function renderHistory(rows) {
+    var h = $("history"); h.replaceChildren();
+    rows.forEach(function (r) {
+      var c = el("article", "card");
+      c.append(el("span", "meta", when(r.at)), el("strong", "", "Feel " + r.feel + "/10 · Going " + r.going + "/10"));
+      if (r.note) c.append(el("p", "detail", r.note));
+      h.append(c);
+    });
+  }
+
+  function load() {
+    fetch("/admin/api/queue", { cache: "no-store", credentials: "same-origin" }).then(function (r) {
+      if (r.status === 403) throw new Error("Not signed in. Reload the page to sign in again.");
+      return r.json();
+    }).then(function (d) {
+      data = d;
+      renderEntries($("queue"), d.pending, false);
+      renderEntries($("private"), d.private, true);
+      renderReports($("reports"), d.reports);
+      renderRequests($("requests"), d.requests);
+      renderHistory(d.checkins);
+      $("c-queue").textContent = d.pending.length || "";
+      $("c-private").textContent = d.private.length || "";
+      var nr = d.reports.filter(function (r) { return r.status === "new"; }).length; $("c-reports").textContent = nr || "";
+      var nq = d.requests.filter(function (r) { return r.status === "new"; }).length; $("c-requests").textContent = nq || "";
+      $("top-status").textContent = (d.pending.length + nq + nr) ? (d.pending.length + nq + nr) + " things need you" : "Nothing needs you right now.";
+    }).catch(function (e) { $("top-status").textContent = e.message || "Couldn’t load. Try again."; });
+  }
+  load();
+
+  ["feel", "going"].forEach(function (id) { var s = $(id), v = $(id + "-v"); s.addEventListener("input", function () { v.textContent = s.value + "/10"; }); });
+  $("save-checkin").addEventListener("click", function () {
+    var b = $("save-checkin"); b.disabled = true; $("checkin-status").textContent = "Saving…";
+    post("/admin/api/checkin", { feel: Number($("feel").value), going: Number($("going").value), note: $("note").value })
+      .then(function () { $("note").value = ""; $("checkin-status").textContent = "Saved. The numbers are public now; the note stays here."; load(); })
+      .catch(function (e) { $("checkin-status").textContent = "Didn’t save: " + e.message; })
+      .then(function () { b.disabled = false; });
+  });
+  $("import-go").addEventListener("click", function () {
+    var f = $("import-file").files[0];
+    if (!f) { $("import-status").textContent = "Pick a file first."; return; }
+    $("import-status").textContent = "Importing…";
+    f.text().then(function (txt) { return post("/admin/api/import", JSON.parse(txt)); })
+      .then(function (d) { $("import-status").textContent = "Imported " + d.entries + " entries (" + d.statements + " changes)."; load(); })
+      .catch(function (e) { $("import-status").textContent = "Import failed: " + e.message; });
+  });
+})();
+</script>
+</body></html>

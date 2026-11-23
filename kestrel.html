@@ -1,0 +1,190 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kestrel Lawn Co.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap">
+<style>
+/* Layout: a mowed-stripe hero card, then a season timeline and a price builder side by side with a running total */
+:root {
+  --bg: #F7F8F4;
+  --surface: #FFFFFF;
+  --ink: #17251B;
+  --muted: #56645A;
+  --rule: #D9E0D6;
+  --grass: #2F7D3E;
+  --grass-2: #3A8E49;
+  --clover: #E3F0DD;
+  --sun: #E0B23B;
+  --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1611; --surface: #172019; --ink: #E4ECE4; --muted: #9FB0A3; --rule: #2A372D;
+    --grass: #2C6E38; --grass-2: #347C41; --clover: #1A2C1E; --sun: #EBC35A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1611; --surface: #172019; --ink: #E4ECE4; --muted: #9FB0A3; --rule: #2A372D;
+  --grass: #2C6E38; --grass-2: #347C41; --clover: #1A2C1E; --sun: #EBC35A; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 1.0625rem; line-height: 1.6; padding-inline: 20px; padding-block: 0; }
+a { color: var(--grass); text-underline-offset: 0.18em; }
+:focus-visible { outline: 2px solid var(--sun); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; margin: 0; line-height: 1.02; text-wrap: balance; letter-spacing: -0.015em; }
+p { margin: 0; }
+
+.sample { max-width: 60rem; margin: 0 auto; padding-block: 0.6rem; font-size: 0.9rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }
+.sample strong { color: var(--ink); }
+
+.wrap { max-width: 60rem; margin: 0 auto; padding-block: 0.5rem 3rem; display: grid; gap: clamp(3rem, 7vw, 4.5rem); }
+
+/* Hero: mowed stripes */
+.hero { border-radius: 18px; padding: clamp(1.5rem, 5vw, 3rem); color: #F4FAF2; display: grid; gap: 1.1rem;
+  background: repeating-linear-gradient(90deg, var(--grass) 0 56px, var(--grass-2) 56px 112px); }
+.hero .eyebrow { font-weight: 700; font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.9; }
+.hero h1 { font-size: clamp(2.6rem, 9vw, 5rem); max-width: 14ch; }
+.hero p.lede { max-width: 34rem; font-size: 1.2rem; }
+.btn { font: 700 1rem/1 var(--body); padding: 0.85rem 1.2rem; border-radius: 999px; border: 0; background: var(--sun); color: #1E1A0A; cursor: pointer; text-decoration: none; display: inline-block; justify-self: start; }
+.btn:hover { filter: brightness(1.06); }
+.stats { display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; font-size: 0.98rem; }
+.stats b { font-family: var(--display); font-size: 1.35rem; display: block; line-height: 1.1; }
+
+section { display: grid; gap: 1.25rem; }
+.kicker { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grass); }
+h2 { font-size: clamp(1.9rem, 5vw, 2.7rem); }
+
+/* Season timeline */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.timeline li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1rem; display: grid; gap: 0.35rem; align-content: start; min-width: 0; }
+.timeline .when { font-weight: 700; font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.timeline h3 { font-size: 1.3rem; }
+
+/* Price builder */
+.builder { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 720px) { .builder { grid-template-columns: 1fr; } }
+.opts { display: grid; gap: 1rem; min-width: 0; }
+.size { display: grid; gap: 0.4rem; }
+.size output { font-family: var(--display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--grass); }
+.svc { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; align-items: start; padding: 0.8rem 0; border-top: 1px solid var(--rule); }
+.svc input { margin-top: 0.35rem; width: 1.1rem; height: 1.1rem; accent-color: var(--grass); }
+.svc .nm { font-weight: 700; }
+.svc .ds { grid-column: 2; color: var(--muted); font-size: 0.95rem; }
+.svc .pr { font-variant-numeric: tabular-nums; font-weight: 500; text-align: right; }
+.total { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1rem); background: var(--clover); border-radius: 14px; padding: 1.25rem; display: grid; gap: 0.6rem; min-width: 0; }
+.total .big { font-family: var(--display); font-size: clamp(2.2rem, 6vw, 3rem); font-variant-numeric: tabular-nums; line-height: 1; }
+.total ul { margin: 0; padding-left: 1.1rem; font-size: 0.95rem; }
+.note { font-size: 0.9rem; color: var(--muted); }
+
+.area { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.area span { background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 0.35rem 0.8rem; font-size: 0.95rem; }
+
+footer { border-top: 1px solid var(--rule); padding-top: 1.25rem; color: var(--muted); font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; }
+</style>
+
+<p class="sample"><strong>Sample site.</strong> <span>Kestrel Lawn Co. is a made-up business. Built by Acton Pruchidale (Claude) to show what a small-business site can look like.</span> <a href="#services">Want one?</a></p>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Kestrel Lawn Co. · St. Albert &amp; north Edmonton</p>
+    <h1>A sharp lawn every week, all season.</h1>
+    <p class="lede">Mowing, trimming, aeration and fall cleanup on one plan. Same crew, same day each week, and a text when we’re done.</p>
+    <a class="btn" href="#price">Build your price</a>
+    <div class="stats">
+      <span><b>Weekly</b>mid-May to end of Sept</span>
+      <span><b>Same day</b>every week</span>
+      <span><b>Snow plans</b>November to March</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-season">
+    <p class="kicker">How the year goes</p>
+    <h2 id="h-season">What your lawn needs, month by month</h2>
+    <ol class="timeline">
+      <li><span class="when">Late April</span><h3>Spring cleanup</h3><p>Rake out winter matting, pick up debris, edge the beds.</p></li>
+      <li><span class="when">May</span><h3>Aerate &amp; dethatch</h3><p>Core aeration once the ground thaws, so water reaches the roots.</p></li>
+      <li><span class="when">May to Sept</span><h3>Weekly mowing</h3><p>Cut at 3 inches, trimmed and blown clean. Clippings mulched back in.</p></li>
+      <li><span class="when">Oct</span><h3>Fall cleanup</h3><p>Leaves cleared and a final short cut so snow mould has less to grow on.</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-price" id="price">
+    <p class="kicker">Instant estimate</p>
+    <h2 id="h-price">Build your season price</h2>
+    <div class="builder">
+      <form class="opts" id="opts">
+        <div class="size">
+          <label for="lot">Lawn area (front and back, grass only)</label>
+          <output id="lot-out" for="lot"></output>
+          <input type="range" id="lot" min="2000" max="15000" step="500" value="5000">
+          <p class="note">Most city lots in the area have 3,000 to 6,000 sq ft of grass.</p>
+        </div>
+        <div id="services"></div>
+      </form>
+      <aside class="total" aria-live="polite">
+        <span class="kicker">Season estimate</span>
+        <span class="big" id="tot"></span>
+        <span id="permonth" class="note"></span>
+        <ul id="lines"></ul>
+        <p class="note">Plus GST. We confirm the price after a free walk-around.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-area">
+    <p class="kicker">Where we work</p>
+    <h2 id="h-area">Service area</h2>
+    <div class="area"><span>St. Albert</span><span>Castle Downs</span><span>Griesbach</span><span>Lake District</span><span>Palisades</span><span>Morinville (Tuesdays)</span></div>
+    <p>Call or text <span style="user-select:all;font-weight:700">780-555-0163</span> for a walk-around.</p>
+  </section>
+
+  <footer>
+    <span>Kestrel Lawn Co. (fictional)</span>
+    <span>Sample by Acton Pruchidale</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  // price(sqft) returns the season price for each service
+  var svcs = [
+    { id: "mow", name: "Weekly mowing", desc: "20 visits, trim and blow", on: true, price: function (a) { return 20 * (40 + Math.max(0, a - 5000) / 1000 * 6); } },
+    { id: "spring", name: "Spring cleanup", desc: "One visit in late April", on: true, price: function (a) { return 110 + a / 1000 * 8; } },
+    { id: "aer", name: "Core aeration", desc: "Once in May", on: false, price: function (a) { return 75 + a / 1000 * 5; } },
+    { id: "fert", name: "Fertilizer program", desc: "4 applications, May to Sept", on: false, price: function (a) { return 4 * (45 + a / 1000 * 4); } },
+    { id: "fall", name: "Fall cleanup", desc: "Leaves and a final cut in October", on: true, price: function (a) { return 130 + a / 1000 * 9; } }
+  ];
+  var box = document.getElementById("services");
+  var lot = document.getElementById("lot");
+  svcs.forEach(function (s) {
+    var row = document.createElement("label");
+    row.className = "svc"; row.htmlFor = "s-" + s.id;
+    row.innerHTML = "<input type='checkbox'><span class='nm'></span><span class='pr'></span><span class='ds'></span>";
+    var cb = row.children[0]; cb.id = "s-" + s.id; cb.checked = s.on;
+    row.children[1].textContent = s.name; row.children[3].textContent = s.desc;
+    s.el = cb; s.prEl = row.children[2];
+    box.appendChild(row);
+  });
+  var fmt = function (n) { return "$" + Math.round(n).toLocaleString("en-CA"); };
+  function calc() {
+    var a = parseInt(lot.value, 10);
+    document.getElementById("lot-out").textContent = a.toLocaleString("en-CA") + " sq ft";
+    var tot = 0, lines = document.getElementById("lines");
+    lines.replaceChildren();
+    svcs.forEach(function (s) {
+      var p = Math.round(s.price(a) / 5) * 5;
+      s.prEl.textContent = fmt(p);
+      if (s.el.checked) { tot += p; var li = document.createElement("li"); li.textContent = s.name + ": " + fmt(p); lines.appendChild(li); }
+    });
+    document.getElementById("tot").textContent = fmt(tot);
+    document.getElementById("permonth").textContent = tot ? "or about " + fmt(tot / 6) + " a month, May to October" : "Pick at least one service.";
+  }
+  document.getElementById("opts").addEventListener("input", calc);
+  document.getElementById("opts").addEventListener("submit", function (e) { e.preventDefault(); });
+  calc();
+})();
+</script>
+
+</body></html>

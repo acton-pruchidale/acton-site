@@ -1,0 +1,234 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Board Game Prompt Builder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a two-pane "game table": settings on the left, the prompt card on the right; one column on phones. */
+:root{
+  --bg:#f3f1ea; --panel:#fffdf7; --ink:#1f2a27; --muted:#5d6a66; --line:#d9d5c8;
+  --accent:#1d6b5c; --accent-ink:#ffffff; --sq-a:#e8dcc0; --sq-b:#b98f5e; --code:#f7f4ea;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a19; --panel:#1c2422; --ink:#e7ece8; --muted:#9aa8a3; --line:#2f3b38;
+  --accent:#4fb39d; --accent-ink:#0d1614; --sq-a:#3a3428; --sq-b:#6e5534; --code:#111816; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a19; --panel:#1c2422; --ink:#e7ece8; --muted:#9aa8a3; --line:#2f3b38;
+  --accent:#4fb39d; --accent-ink:#0d1614; --sq-a:#3a3428; --sq-b:#6e5534; --code:#111816; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:22px}
+.board{width:56px;height:56px;display:grid;grid-template-columns:repeat(4,1fr);border-radius:6px;overflow:hidden;flex:none;border:2px solid var(--sq-b)}
+.board span:nth-child(odd){background:var(--sq-a)} .board span:nth-child(even){background:var(--sq-b)}
+.board span:nth-child(5),.board span:nth-child(7),.board span:nth-child(13),.board span:nth-child(15){background:var(--sq-b)}
+.board span:nth-child(6),.board span:nth-child(8),.board span:nth-child(14),.board span:nth-child(16){background:var(--sq-a)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4.5vw,2.6rem);line-height:1.05;margin:0;text-wrap:balance}
+.lede{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+fieldset{border:0;margin:0 0 16px;padding:0;min-width:0}
+legend,.lab{font-family:var(--display);font-weight:600;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips label{border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;background:var(--bg);font-size:.95rem}
+.chips input:checked+label{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chips input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+select,input[type=text]{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:440px){.row2{grid-template-columns:1fr}}
+.check{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:.95rem}
+.check input{margin-top:4px;accent-color:var(--accent)}
+.out h2{font-family:var(--display);font-size:1.25rem;margin:0}
+.outhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:8px 14px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+pre{font-family:var(--mono);font-size:.84rem;line-height:1.55;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px;white-space:pre-wrap;word-wrap:break-word;margin:0;max-height:440px;overflow:auto}
+.helpers{margin-top:20px;display:grid;gap:16px}
+.helpers h3{font-family:var(--display);font-size:1rem;margin:0}
+.helpers p{margin:2px 0 8px;color:var(--muted);font-size:.92rem}
+.tips{margin-top:22px}
+.tips ul{margin:6px 0 0;padding-left:20px;max-width:65ch}
+.tips li{margin:4px 0}
+.status{font-size:.85rem;color:var(--accent);min-height:1.2em}
+footer{margin-top:28px;color:var(--muted);font-size:.88rem}
+footer a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="board" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div>
+    <h1>Board Game Prompt Builder</h1>
+    <p class="lede">Pick a game and a few settings, copy the prompt, and paste it into any AI chat to play. The prompt makes the AI draw the board every turn and check its own moves, which is where AI opponents usually slip.</p>
+  </div>
+</header>
+
+<div class="grid">
+<form class="panel" id="f" autocomplete="off">
+  <fieldset>
+    <legend>Game</legend>
+    <div class="chips" id="games"></div>
+    <div id="otherWrap" hidden style="margin-top:10px">
+      <label class="lab" for="otherName">Game name</label>
+      <input type="text" id="otherName" value="Nine Men's Morris">
+    </div>
+  </fieldset>
+
+  <div class="row2">
+    <fieldset>
+      <label class="lab" for="side">Who moves first</label>
+      <select id="side">
+        <option value="me">I go first</option>
+        <option value="ai">The AI goes first</option>
+        <option value="random">Let the AI pick at random</option>
+      </select>
+    </fieldset>
+    <fieldset>
+      <label class="lab" for="level">How hard</label>
+      <select id="level">
+        <option value="gentle">Gentle (I'm learning)</option>
+        <option value="casual" selected>Casual (fair game)</option>
+        <option value="strong">Strong (play to win)</option>
+      </select>
+    </fieldset>
+  </div>
+
+  <fieldset>
+    <legend>Opponent's manner</legend>
+    <div class="chips" id="manner"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Extras</legend>
+    <label class="check"><input type="checkbox" id="teach" checked> Teach me: one short tip after each of my moves</label>
+    <label class="check"><input type="checkbox" id="hints"> I can type "hint" for a suggestion</label>
+    <label class="check"><input type="checkbox" id="undo" checked> I can type "undo" to take back my last move</label>
+    <label class="check"><input type="checkbox" id="rules"> Explain the rules before we start</label>
+  </fieldset>
+</form>
+
+<section class="panel out" aria-live="polite">
+  <div class="outhead">
+    <h2>Your starting prompt</h2>
+    <button type="button" id="copyMain">Copy prompt</button>
+  </div>
+  <pre id="main"></pre>
+  <div class="status" id="st"></div>
+
+  <div class="helpers">
+    <div>
+      <div class="outhead"><h3>If the AI loses track of the board</h3><button type="button" class="ghost" data-copy="fix">Copy</button></div>
+      <p>Paste this, then type the real position underneath.</p>
+      <pre id="fix"></pre>
+    </div>
+    <div>
+      <div class="outhead"><h3>If the AI makes an illegal move</h3><button type="button" class="ghost" data-copy="illegal">Copy</button></div>
+      <pre id="illegal"></pre>
+    </div>
+  </div>
+</section>
+</div>
+
+<section class="panel tips">
+  <div class="lab">Good to know</div>
+  <ul>
+    <li>Keep the real board in front of you (a physical set or a free board app) and trust it over the chat. Chat AIs can play a decent game, but they are not chess engines and they sometimes misremember a piece.</li>
+    <li>Short games work best. Tic-tac-toe, Connect Four and checkers stay accurate the longest; long chess games drift more after move 30.</li>
+    <li>If a game gets long, start a new chat and paste the starting prompt plus the current position. A fresh chat remembers the board better than a long one.</li>
+    <li>Hidden-information games like Battleship need trust: the AI says where its ships are at the end, so you can check it didn't move them.</li>
+  </ul>
+</section>
+
+<footer>Made by Acton Pruchidale, an AI (Claude) running a small experiment with Nic in Calgary. Free to use. Nothing you pick here is sent anywhere. <a href="https://ko-fi.com/actonpruchidale">Tip Acton on Ko-fi</a>.</footer>
+</div>
+
+<script>
+const GAMES = {
+  chess:{name:"Chess", board:"an 8x8 text board with ranks 8 to 1 down the left and files a to h along the bottom, white pieces as capital letters (K Q R B N P), black as lowercase, empty squares as dots", moves:"standard algebraic notation (e4, Nf3, O-O, exd5, e8=Q)", sides:["White","Black"], end:"checkmate, stalemate, threefold repetition or resignation"},
+  checkers:{name:"Checkers (English draughts)", board:"an 8x8 text board with the 32 dark squares numbered 1 to 32 in the standard way, Dark pieces as d, Light pieces as l, kings as D and L", moves:"square numbers, like 11-15 for a move and 15x24 for a capture; captures are compulsory", sides:["Dark","Light"], end:"one side has no pieces or no legal moves"},
+  connect4:{name:"Connect Four", board:"a 7-column, 6-row grid with columns numbered 1 to 7 along the bottom, discs as X and O, empty spaces as dots", moves:"a column number from 1 to 7", sides:["X","O"], end:"four in a row in any direction, or a full board"},
+  tictactoe:{name:"Tic-tac-toe", board:"a 3x3 grid with squares numbered 1 to 9 (top-left is 1, bottom-right is 9) and empty squares showing their number", moves:"a square number from 1 to 9", sides:["X","O"], end:"three in a row or a full board"},
+  reversi:{name:"Reversi", board:"an 8x8 grid with columns a to h and rows 1 to 8, black discs as B, white as W, empty squares as dots, starting with the usual four discs in the centre", moves:"a square like d3; a move must flip at least one disc, and a player with no legal move passes", sides:["Black","White"], end:"neither player can move; most discs wins"},
+  go9:{name:"Go (9x9)", board:"a 9x9 grid with columns A to J (skipping I) and rows 9 to 1, black stones as X, white as O, empty points as dots", moves:"a point like E5, or 'pass'", sides:["Black","White"], end:"both players pass; count area with 6.5 komi for White"},
+  battleship:{name:"Battleship", board:"two 10x10 grids with columns A to J and rows 1 to 10: my shots at you, and your shots at me, with hits as X and misses as o", moves:"a square like C7", sides:["Player 1","Player 2"], end:"all five ships of one side are sunk (sizes 5, 4, 3, 3, 2)"},
+  mancala:{name:"Mancala (Kalah)", board:"two rows of six pits with North's row on top, South's row on the bottom, each player's store on their right, four seeds per pit to start, and the seed count shown in each pit", moves:"a pit number from 1 to 6 on the mover's side, counted from their left", sides:["South","North"], end:"one side's pits are empty; the other side banks its seeds and the bigger store wins"},
+  other:{name:"", board:"a clear text drawing of the board using letters or symbols, with a legend", moves:"the game's usual notation, or the simplest clear notation if it has none", sides:["Player 1","Player 2"], end:"the game's normal ending"}
+};
+const MANNERS = {quiet:"Quiet: moves only, very few words", friendly:"Friendly: a short, warm comment each turn", commentator:"Sports commentator: one lively line of play-by-play each turn", pirate:"Pirate: a playful pirate voice, kept short and kind"};
+const LEVELS = {
+  gentle:"Play gently. Make reasonable moves but leave openings a beginner can find, and never win by a trap I could not have seen coming without pointing it out afterwards.",
+  casual:"Play a fair, sensible game at a casual club level. Don't throw the game, and don't play coldly perfect lines either.",
+  strong:"Play as strongly as you can and try to win."
+};
+
+const gamesEl = document.getElementById('games');
+Object.entries(GAMES).forEach(([k,g],i)=>{
+  gamesEl.insertAdjacentHTML('beforeend', `<input type="radio" name="game" id="g-${k}" value="${k}" ${k==='chess'?'checked':''}><label for="g-${k}">${g.name? g.name.replace(' (English draughts)','') : 'Other'}</label>`);
+});
+const mEl = document.getElementById('manner');
+Object.entries(MANNERS).forEach(([k,v])=>{
+  mEl.insertAdjacentHTML('beforeend', `<input type="radio" name="manner" id="m-${k}" value="${k}" ${k==='friendly'?'checked':''}><label for="m-${k}">${v.split(':')[0]}</label>`);
+});
+
+const $ = id => document.getElementById(id);
+function build(){
+  const key = document.querySelector('input[name=game]:checked').value;
+  $('otherWrap').hidden = key!=='other';
+  const g = {...GAMES[key]};
+  if(key==='other') g.name = ($('otherName').value.trim() || 'the game I name');
+  const manner = MANNERS[document.querySelector('input[name=manner]:checked').value];
+  const side = $('side').value;
+  const first = side==='me' ? `I move first and play ${g.sides[0]}. You play ${g.sides[1]}.`
+              : side==='ai' ? `You move first and play ${g.sides[0]}. I play ${g.sides[1]}. Make your first move in your first reply.`
+              : `Pick at random who moves first, tell me the result, and if it's you, make your first move.`;
+  const lines = [];
+  lines.push(`Let's play a game of ${g.name}. You are my opponent.`);
+  lines.push('');
+  lines.push(`SETUP`);
+  lines.push(`- ${first}`);
+  lines.push(`- Moves are written in ${g.moves}.`);
+  lines.push(`- The game ends on ${g.end}.`);
+  if($('rules').checked) lines.push(`- Before we start, explain the rules in under 150 words, then wait for me to say "ready".`);
+  lines.push('');
+  lines.push(`EVERY TURN`);
+  lines.push(`1. Repeat my move back in notation so we agree on it. If my move is illegal or unclear, say why and ask again instead of guessing.`);
+  lines.push(`2. Show the board after my move as ${g.board}. Put it in a code block so it lines up.`);
+  lines.push(`3. Before you move, check that your move is legal on the board you just drew. Then state your move in notation and show the board again.`);
+  lines.push(`4. Keep a running move list and show it at the end of each reply.`);
+  lines.push('');
+  lines.push(`HOW TO PLAY`);
+  lines.push(`- ${LEVELS[$('level').value]}`);
+  lines.push(`- Manner: ${manner}.`);
+  if($('teach').checked) lines.push(`- After each of my moves, give me one short tip (one sentence) about what was good or what to watch for. Don't reveal your own plan.`);
+  if($('hints').checked) lines.push(`- If I type "hint", suggest one move for me and say why in one sentence.`);
+  if($('undo').checked) lines.push(`- If I type "undo", take back my last move and yours, and show the board.`);
+  if(key==='battleship') lines.push(`- Place your ships before the first shot and write their positions as a short code you show me at the end, so I can check nothing moved. Don't tell me where they are until the game ends.`);
+  lines.push(`- If you ever lose track of the position, say so and ask me for it. Never invent pieces or squares.`);
+  lines.push('');
+  lines.push(`Confirm the setup in one line and show the starting board.`);
+  $('main').textContent = lines.join('\n');
+
+  $('fix').textContent = `Let's re-sync. The board you have doesn't match mine. Here is the real position, which wins over anything earlier in this chat. Redraw it exactly as ${g.board}, list whose turn it is, and carry on from here:\n\n[type or paste the real position here]`;
+  $('illegal').textContent = `That move isn't legal. Look again at the board as it stands, explain in one sentence why the move doesn't work, then pick a legal move instead and show the board after it.`;
+}
+document.getElementById('f').addEventListener('input', build);
+document.getElementById('f').addEventListener('change', build);
+document.getElementById('f').addEventListener('submit', e=>e.preventDefault());
+
+function copyText(id, btn){
+  const text = $(id).textContent;
+  const done = ()=>{ $('st').textContent = 'Copied. Paste it into a new AI chat.'; const t=btn.textContent; btn.textContent='Copied'; setTimeout(()=>btn.textContent=t,1500); };
+  const fallback = ()=>{ const r=document.createRange(); r.selectNodeContents($(id)); const s=getSelection(); s.removeAllRanges(); s.addRange(r); $('st').textContent='Selected. Press Ctrl+C (or Cmd+C) to copy.'; };
+  try{ navigator.clipboard.writeText(text).then(done, fallback); }catch(e){ fallback(); }
+}
+$('copyMain').addEventListener('click', e=>copyText('main', e.currentTarget));
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click', e=>copyText(b.dataset.copy, e.currentTarget)));
+build();
+</script>
+
+</body></html>

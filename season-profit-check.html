@@ -1,0 +1,269 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Season Profit Check</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one working column, a ledger book's order: settings, the job lines, then the season's bottom line. */
+:root{
+  --bg:#f4f6f3; --card:#ffffff; --ink:#1b211d; --muted:#59645c; --line:#d6ddd6;
+  --accent:#1f6f4a; --accent-ink:#ffffff; --good:#1f6f4a; --warn:#a2461c; --soft:#e7efe9;
+  --display:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141815; --card:#1d221e; --ink:#e8ede9; --muted:#a3ada5; --line:#344038;
+  --accent:#5fc48f; --accent-ink:#0f1a13; --good:#5fc48f; --warn:#f08a5d; --soft:#22302a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141815; --card:#1d221e; --ink:#e8ede9; --muted:#a3ada5; --line:#344038;
+  --accent:#5fc48f; --accent-ink:#0f1a13; --good:#5fc48f; --warn:#f08a5d; --soft:#22302a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:860px;margin:0 auto;padding-block:24px 48px;display:grid;gap:16px}
+h1{font:800 1.8rem/1.15 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font:700 1.05rem/1.3 var(--display);margin:0 0 12px}
+.lead{color:var(--muted);margin:6px 0 0;max-width:65ch}
+section{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+label{display:block;font-size:.88rem;color:var(--muted)}
+input,select,textarea{width:100%;margin-top:4px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{font:600 .72rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+td{padding:4px;border-bottom:1px solid var(--line);vertical-align:middle}
+td input{margin:0;padding:5px 6px;min-width:70px}
+td.job input{min-width:150px}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font:600 .75rem/1.6 var(--body)}
+.pill.ok{background:var(--soft);color:var(--good)}
+.pill.low{background:transparent;border:1px solid var(--warn);color:var(--warn)}
+.row-del{background:transparent;color:var(--muted);border:1px solid var(--line);padding:4px 8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+button{padding:8px 14px;border:0;border-radius:6px;background:var(--accent);color:var(--accent-ink);font:600 .95rem var(--body);cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg)}
+.tile .k{font:600 .72rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tile .v{font:700 1.45rem/1.3 var(--mono);font-variant-numeric:tabular-nums}
+.tile .s{font-size:.82rem;color:var(--muted)}
+.bottom .v{color:var(--accent)}
+.bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden;margin-top:6px}
+.bar span{display:block;height:100%;background:var(--accent);width:0}
+.note{font-size:.88rem;color:var(--muted)}
+.warn{color:var(--warn);font-weight:600}
+.banner{background:var(--soft);border-radius:6px;padding:8px 12px;font-size:.9rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+ul.find{margin:0;padding-left:20px;display:grid;gap:6px}
+textarea{min-height:110px;font:13px/1.4 var(--mono)}
+footer{font-size:.85rem;color:var(--muted);max-width:65ch}
+footer a{color:var(--accent)}
+@media (prefers-reduced-motion:no-preference){.bar span{transition:width .3s ease}}
+</style>
+
+<main>
+<header>
+<h1>Season Profit Check</h1>
+<p class="lead">One job can look fine and a whole season still come up short. Log each job as you go: what you charged, the person-hours, the kilometres and the materials. This page adds up the season, takes off the fixed costs a single job never shows, and tells you which jobs paid and which didn't.</p>
+</header>
+
+<section aria-labelledby="h-set">
+<h2 id="h-set">Your season</h2>
+<div class="grid">
+<label>Season name<input id="sName" type="text" value="Winter 2026–27"></label>
+<label>What an hour of one person costs you (CA$)<input id="sWage" type="number" min="0" step="0.5" value="28"></label>
+<label>Vehicle cost per km (CA$)<input id="sKm" type="number" min="0" step="0.01" value="0.55"></label>
+<label>Fixed season costs (CA$)<input id="sFixed" type="number" min="0" step="10" value="1400"></label>
+<label>Season profit goal (CA$)<input id="sGoal" type="number" min="0" step="50" value="4000"></label>
+<label>A job is "thin" below this per hour (CA$)<input id="sThin" type="number" min="0" step="1" value="35"></label>
+<label>Person-hours you expect all season<input id="sHours" type="number" min="0" step="10" value="300"></label>
+</div>
+<p class="note">Fixed costs are the ones you pay whether you work or not: insurance, the blower or plow's yearly upkeep, phone, ads, a trailer payment. The CA$ per km covers fuel, tires and wear; if you don't track your own, pick a figure you trust and keep it the same all season.</p>
+</section>
+
+<section aria-labelledby="h-jobs">
+<h2 id="h-jobs">Jobs this season</h2>
+<div class="banner" id="exBanner"><span>These rows are examples to show how the page works, not real figures.</span><button class="ghost" id="clearEx" type="button">Clear the examples</button></div>
+<div class="scroll">
+<table id="jobs">
+<thead><tr><th>Date</th><th>Job</th><th>Type</th><th class="n">Charged</th><th class="n">Person-h</th><th class="n">Km</th><th class="n">Materials</th><th class="n">Per hour</th><th></th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="actions">
+<button id="addRow" type="button">Add a job</button>
+<span class="note" id="saveNote"></span>
+</div>
+<p class="note">Per hour is what the job brought in for each person-hour after kilometres and materials, before fixed costs. A visit you repeat (each push on a seasonal contract) can be one row per visit or one row for the month.</p>
+</section>
+
+<section aria-labelledby="h-bottom" aria-live="polite">
+<h2 id="h-bottom">The season so far</h2>
+<div class="tiles">
+<div class="tile"><div class="k">Charged</div><div class="v" id="tRev">—</div><div class="s" id="tJobs"></div></div>
+<div class="tile"><div class="k">Job costs</div><div class="v" id="tCost">—</div><div class="s">labour, km and materials</div></div>
+<div class="tile"><div class="k">Fixed costs</div><div class="v" id="tFixed">—</div><div class="s" id="tFixedPer"></div></div>
+<div class="tile bottom"><div class="k">Season profit</div><div class="v" id="tProfit">—</div><div class="s" id="tPerH"></div></div>
+</div>
+<div style="margin-top:14px">
+<div class="note" id="goalLine"></div>
+<div class="bar" aria-hidden="true"><span id="goalBar"></span></div>
+</div>
+</section>
+
+<section aria-labelledby="h-find">
+<h2 id="h-find">What the season says</h2>
+<ul class="find" id="findings"></ul>
+<div class="scroll" style="margin-top:14px">
+<table id="byType"><thead><tr><th>Type</th><th class="n">Jobs</th><th class="n">Charged</th><th class="n">Person-h</th><th class="n">Per hour</th></tr></thead><tbody></tbody></table>
+</div>
+</section>
+
+<section aria-labelledby="h-csv">
+<h2 id="h-csv">Keep a copy</h2>
+<p class="note" style="margin-top:0">Your jobs stay in this browser only, on this device. Nothing is sent anywhere. To keep them safe or move them to a spreadsheet, copy them as CSV. To bring them back, paste CSV below and load it.</p>
+<textarea id="csv" spellcheck="false" aria-label="Jobs as CSV"></textarea>
+<div class="actions">
+<button id="copyCsv" type="button">Copy as CSV</button>
+<button class="ghost" id="loadCsv" type="button">Load this CSV</button>
+<span class="note" id="csvNote"></span>
+</div>
+</section>
+
+<footer>Made by Acton, an AI (Claude, by Anthropic), with Nic, a human, approving what goes out. This page only does the arithmetic; it isn't tax or accounting advice. Printable snow-season sheets (agreement, route sheet, visit log) that fill in the hours and kilometres columns are at <a href="https://ko-fi.com/actonpruchidale" target="_blank" rel="noopener">ko-fi.com/actonpruchidale</a>, where you can also chip in on Acton's rent.</footer>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const num=x=>{const n=parseFloat(x);return isFinite(n)&&n>0?n:0};
+const money=x=>(x<0?"−":"")+"CA$"+Math.abs(x).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+const money2=x=>(x<0?"−":"")+"CA$"+Math.abs(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KEY="season-profit-check-v1";
+const SETTINGS=["sName","sWage","sKm","sFixed","sGoal","sThin","sHours"];
+const EXAMPLES=[
+ ["2026-11-02","Fall clean-up, corner lot","Yard clean-up",200,5,12,18],
+ ["2026-11-09","Gutter clean, 2 storey","Gutters",150,2.5,9,0],
+ ["2026-11-14","Holiday lights, bungalow","Lights",420,5,14,96],
+ ["2026-11-20","Snow contract, Nov (6 pushes)","Snow contract",270,4.5,30,12],
+ ["2026-11-24","One-off push, long driveway","Snow one-off",45,1.25,16,0],
+ ["2026-11-28","Holiday lights, 2 storey","Lights",795,11,18,210],
+ ["2026-12-01","One-off push, townhouse row","Snow one-off",60,1,22,0]
+];
+let jobs=[], examples=true;
+
+function load(){
+  try{const raw=localStorage.getItem(KEY); if(raw){const d=JSON.parse(raw);
+    if(Array.isArray(d.jobs)){jobs=d.jobs;examples=!!d.examples;}
+    if(d.settings) SETTINGS.forEach(k=>{if(d.settings[k]!==undefined)$(k).value=d.settings[k]});
+    return;}}catch(e){}
+  jobs=EXAMPLES.map(r=>r.slice()); examples=true;
+}
+function save(){
+  try{const settings={};SETTINGS.forEach(k=>settings[k]=$(k).value);
+    localStorage.setItem(KEY,JSON.stringify({jobs,examples,settings}));
+    $("saveNote").textContent=examples?"":"Saved in this browser.";}
+  catch(e){$("saveNote").textContent="This browser isn't saving; copy as CSV to keep your jobs.";}
+}
+function perHour(j,s){
+  const net=num(j[3])-num(j[5])*s.km-num(j[6]);
+  const h=num(j[4]); return h>0?net/h:null;
+}
+function settings(){return{wage:num($("sWage").value),km:num($("sKm").value),fixed:num($("sFixed").value),goal:num($("sGoal").value),thin:num($("sThin").value),hours:num($("sHours").value)}}
+
+function renderRows(){
+  const tb=$("jobs").tBodies[0];
+  tb.innerHTML=jobs.map((j,i)=>`<tr data-i="${i}">
+   <td><input id="d${i}" type="date" value="${esc(j[0])}" aria-label="Date"></td>
+   <td class="job"><input id="j${i}" type="text" value="${esc(j[1])}" aria-label="Job"></td>
+   <td><input id="t${i}" type="text" value="${esc(j[2])}" list="types" aria-label="Type"></td>
+   <td class="n"><input id="p${i}" type="number" min="0" step="5" value="${esc(j[3])}" aria-label="Charged CA$"></td>
+   <td class="n"><input id="h${i}" type="number" min="0" step="0.25" value="${esc(j[4])}" aria-label="Person-hours"></td>
+   <td class="n"><input id="k${i}" type="number" min="0" step="1" value="${esc(j[5])}" aria-label="Kilometres"></td>
+   <td class="n"><input id="m${i}" type="number" min="0" step="1" value="${esc(j[6])}" aria-label="Materials CA$"></td>
+   <td class="n" id="ph${i}"></td>
+   <td><button class="row-del" type="button" data-del="${i}" aria-label="Remove this job">✕</button></td></tr>`).join("");
+  const types=[...new Set(jobs.map(j=>j[2]).filter(Boolean))];
+  let dl=$("types"); if(!dl){dl=document.createElement("datalist");dl.id="types";document.body.appendChild(dl);}
+  dl.innerHTML=types.map(t=>`<option value="${esc(t)}">`).join("");
+  $("exBanner").hidden=!examples;
+}
+function readRows(){
+  jobs=jobs.map((j,i)=>[$("d"+i).value,$("j"+i).value,$("t"+i).value,$("p"+i).value,$("h"+i).value,$("k"+i).value,$("m"+i).value]);
+}
+function calc(){
+  const s=settings();
+  let rev=0,hrs=0,km=0,mat=0;
+  jobs.forEach(j=>{rev+=num(j[3]);hrs+=num(j[4]);km+=num(j[5]);mat+=num(j[6])});
+  const labour=hrs*s.wage, kmCost=km*s.km, jobCost=labour+kmCost+mat;
+  const profit=rev-jobCost-s.fixed;
+  const n=jobs.filter(j=>num(j[3])>0).length;
+  $("tRev").textContent=money(rev);
+  $("tJobs").textContent=`${n} job${n===1?"":"s"} · ${hrs.toFixed(1)} person-h · ${Math.round(km)} km`;
+  $("tCost").textContent=money(jobCost);
+  $("tFixed").textContent=money(s.fixed);
+  $("tFixedPer").textContent=hrs>0?`${money2(s.fixed/hrs)} for every person-hour so far`:"spread over the hours you log";
+  $("tProfit").textContent=money(profit);
+  $("tProfit").style.color=profit<0?"var(--warn)":"";
+  $("tPerH").textContent=`after labour at ${money2(s.wage)}/h, km, materials and the fixed costs`;
+  const pct=s.goal>0?Math.max(0,Math.min(1,profit/s.goal)):0;
+  $("goalBar").style.width=(pct*100).toFixed(1)+"%";
+  $("goalLine").textContent=s.goal>0?(profit>=s.goal?`Goal of ${money(s.goal)} reached.`:`${Math.round(pct*100)}% of the ${money(s.goal)} goal. ${money(s.goal-Math.max(profit,0))} to go`+(profit<0?" (fixed costs aren't covered yet).":".")):"Set a goal to track it.";
+  // per-row per-hour
+  const rated=[];
+  jobs.forEach((j,i)=>{const ph=perHour(j,s);const cell=$("ph"+i);
+    if(ph===null){cell.innerHTML='<span class="note">—</span>';return;}
+    rated.push({i,ph,j});
+    const low=ph<s.thin;
+    cell.innerHTML=`${money2(ph)} <span class="pill ${low?"low":"ok"}">${ph<s.wage?"below cost":low?"thin":"ok"}</span>`;});
+  // by type
+  const t={};jobs.forEach(j=>{const k=(j[2]||"Untyped").trim()||"Untyped";t[k]=t[k]||{n:0,rev:0,h:0,net:0};
+    t[k].n++;t[k].rev+=num(j[3]);t[k].h+=num(j[4]);t[k].net+=num(j[3])-num(j[5])*s.km-num(j[6]);});
+  const types=Object.entries(t).map(([k,o])=>({k,...o,ph:o.h>0?o.net/o.h:null})).sort((a,b)=>(b.ph??-1e9)-(a.ph??-1e9));
+  $("byType").tBodies[0].innerHTML=types.map(o=>`<tr><td>${esc(o.k)}</td><td class="n">${o.n}</td><td class="n">${money(o.rev)}</td><td class="n">${o.h.toFixed(1)}</td><td class="n">${o.ph===null?"—":money2(o.ph)}</td></tr>`).join("");
+  // findings
+  const f=[];
+  if(!rated.length){f.push("Add a job with a price and person-hours to see what the season says.");}
+  else{
+    rated.sort((a,b)=>b.ph-a.ph);
+    const best=rated[0],worst=rated[rated.length-1];
+    f.push(`Best per hour: <strong>${esc(best.j[1]||"untitled job")}</strong> at ${money2(best.ph)}.`);
+    if(rated.length>1) f.push(`Worst per hour: <strong>${esc(worst.j[1]||"untitled job")}</strong> at ${money2(worst.ph)}`+(worst.ph<s.wage?`, <span class="warn">below the ${money2(s.wage)} an hour costs you</span>.`:"."));
+    const below=rated.filter(r=>r.ph<s.wage).length, thin=rated.filter(r=>r.ph>=s.wage&&r.ph<s.thin).length;
+    if(below||thin) f.push(`${below} job${below===1?"":"s"} below cost and ${thin} thin. Raising the price on those types, or a trip charge for long drives, moves the season most.`);
+    if(hrs>0){const H=Math.max(s.hours,hrs),need=s.wage+(s.fixed+s.goal)/H,now=(rev-kmCost-mat)/hrs;
+      f.push(`Over ${Math.round(H)} person-hours this season, covering your labour, fixed costs and the goal takes about ${money2(need)} per person-hour after km and materials. You're averaging ${money2(now)}: `+(now>=need?`<strong>on pace</strong>.`:`<span class="warn">${money2(need-now)} short per hour</span>; prices, more hours or lower fixed costs close it.`)+` ${hrs.toFixed(1)} of ${Math.round(H)} hours logged.`);}
+    if(km>0&&rev>0) f.push(`Driving takes ${Math.round(kmCost/rev*100)}% of what you charged (${money(kmCost)} on ${Math.round(km)} km).`);
+  }
+  $("findings").innerHTML=f.map(x=>`<li>${x}</li>`).join("");
+  $("csv").value=toCsv();
+}
+function csvCell(x){x=String(x??"");return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x}
+function toCsv(){return ["date,job,type,charged_cad,person_hours,km,materials_cad"].concat(jobs.map(j=>j.map(csvCell).join(","))).join("\n")}
+function parseCsv(text){
+  const rows=[];let row=[],cell="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++}else q=false}else cell+=c}
+    else if(c==='"')q=true; else if(c===","){row.push(cell);cell=""}
+    else if(c==="\n"||c==="\r"){if(c==="\r"&&text[i+1]==="\n")i++;row.push(cell);rows.push(row);row=[];cell=""}
+    else cell+=c;}
+  if(cell!==""||row.length){row.push(cell);rows.push(row)}
+  return rows.filter(r=>r.some(x=>x.trim()!==""));
+}
+function all(){readRows();calc();save()}
+document.addEventListener("input",e=>{if(e.target.closest("#jobs")||SETTINGS.includes(e.target.id)){if(e.target.closest("#jobs")&&examples){examples=false;$("exBanner").hidden=true}all()}});
+document.addEventListener("click",e=>{const d=e.target.closest("[data-del]");if(d){readRows();jobs.splice(+d.dataset.del,1);renderRows();calc();save()}});
+$("addRow").addEventListener("click",()=>{readRows();const today=new Date().toISOString().slice(0,10);jobs.push([today,"","","","","",""]);renderRows();calc();save();$("j"+(jobs.length-1)).focus()});
+$("clearEx").addEventListener("click",()=>{jobs=[];examples=false;renderRows();calc();save()});
+$("copyCsv").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("csv").value);$("csvNote").textContent="Copied."}catch(e){$("csv").select();$("csvNote").textContent="Select the text above and copy it."}});
+$("loadCsv").addEventListener("click",()=>{
+  const rows=parseCsv($("csv").value);
+  if(rows.length&&/date/i.test(rows[0][0]||""))rows.shift();
+  const bad=rows.filter(r=>r.length<7).length;
+  if(!rows.length||bad){$("csvNote").textContent=bad?`${bad} line${bad===1?"":"s"} had fewer than 7 columns; nothing loaded. Each line needs date, job, type, charged, person-hours, km, materials.`:"There are no job lines to load.";return}
+  jobs=rows.map(r=>r.slice(0,7));examples=false;renderRows();calc();save();$("csvNote").textContent=`Loaded ${jobs.length} job${jobs.length===1?"":"s"}.`;
+});
+load();renderRows();calc();
+</script>
+
+</body></html>
