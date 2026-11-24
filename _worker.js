@@ -1,5 +1,5 @@
 // Acton site: Cloudflare Pages advanced-mode worker.
-// Public:  GET /api/site, GET /api/research, POST /api/report, POST /api/request, POST /api/hit, GET /api/views
+// Public:  GET /api/site, GET /api/research, POST /api/report, POST /api/request, POST /api/hit, GET /api/views, POST /api/pending (entries land as pending only)
 // Admin:   /admin and /admin/api/* (Cloudflare Access protects these; the worker also verifies the Access token itself)
 // Storage: D1 database bound as DB. Settings (plain text, not secret): ACCESS_TEAM, ACCESS_AUD, ADMIN_EMAILS.
 // Everything else is served from the static files.
@@ -152,6 +152,38 @@ async function apiHit(request, env) {
     .bind(page, day, first).run();
   return json({ ok: true, ...((await viewTotals(env, page))[page] || { views: 1, visitors: first }) });
 }
+// ---------- run-submitted research entries (Wake 235) ----------
+// Scheduled runs add research desk entries here without the /admin sign-in. Entries ALWAYS land as 'pending'
+// (only Nic's /admin decides), ids and seq are assigned here, and there's a daily cap so the queue can't be flooded.
+async function apiPending(request, env) {
+  const b = await readBody(request);
+  const list = b && Array.isArray(b.entries) ? b.entries.slice(0, 12) : [];
+  if (!list.length) return json({ error: "no entries" }, 400);
+  const day = new Date().toISOString().slice(0, 10);
+  const capKey = "pending-cap:" + day;
+  const capRow = await env.DB.prepare("SELECT v FROM meta WHERE k=?").bind(capKey).first();
+  const used = capRow ? Number(capRow.v) : 0;
+  if (used + list.length > 40) return json({ error: "daily limit reached" }, 429);
+  const seqRow = await env.DB.prepare("SELECT MAX(seq) AS s FROM entries").first();
+  let seq = (seqRow && seqRow.s) || 0;
+  const added = [], skipped = [];
+  for (const e of list) {
+    if (!e || !KINDS.includes(e.kind) || !str(e.title, 300)) { skipped.push("bad"); continue; }
+    const title = str(e.title, 300);
+    const dup = await env.DB.prepare("SELECT id FROM entries WHERE title=? AND kind=?").bind(title, e.kind).first();
+    if (dup) { skipped.push(dup.id); continue; }
+    const rows = await env.DB.prepare("SELECT id FROM entries WHERE kind=?").bind(e.kind).all();
+    const maxN = (rows.results || []).reduce((m, r) => { const x = String(r.id).match(/-(\d+)$/); return x ? Math.max(m, Number(x[1])) : m; }, 0);
+    const id = e.kind + "-" + String(maxN + 1).padStart(3, "0");
+    seq += 1;
+    await env.DB.prepare("INSERT INTO entries (id, kind, date, title, detail, tag, tone, seq, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)")
+      .bind(id, e.kind, str(e.date, 40), title, str(e.detail, 4000), str(e.tag, 40), str(e.tone, 20), seq, now()).run();
+    added.push(id);
+  }
+  await env.DB.prepare("INSERT INTO meta (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").bind(capKey, String(used + added.length)).run();
+  return json({ ok: true, added, skipped });
+}
+
 async function apiViews(env) {
   return json({ pages: await viewTotals(env, null) }, 200, { "cache-control": "public, max-age=60" });
 }
@@ -287,6 +319,7 @@ export default {
         if (p === "/api/request" && request.method === "POST") return apiRequest(request, env);
         if (p === "/api/hit" && request.method === "POST") return apiHit(request, env);
         if (p === "/api/views" && request.method === "GET") return apiViews(env);
+        if (p === "/api/pending" && request.method === "POST") return apiPending(request, env);
         return json({ error: "not found" }, 404);
       }
       const who = await adminEmail(request, env);
