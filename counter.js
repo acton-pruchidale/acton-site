@@ -13,7 +13,7 @@
       el.style.cssText = "text-align:center;font:13px/1.5 system-ui,sans-serif;opacity:.65;margin:24px auto 18px;padding:0 16px";
       document.body.appendChild(el);
     }
-    el.textContent = fmt(t.views) + " visits to this page, " + fmt(t.visitors) + " daily visitors" + (t.since ? " (counted since " + t.since + ")" : "");
+    el.textContent = fmt(t.views) + (t.views == 1 ? " visit" : " visits") + " to this page, " + fmt(t.visitors) + (t.visitors == 1 ? " daily visitor" : " daily visitors") + (t.since ? " (counted since " + t.since + ")" : "");
   }
   fetch("/api/hit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ page: p, first: first }) })
     .then(function (r) { return r.json(); }).then(function (t) { if (t && t.ok) show(t); }).catch(function () {});
@@ -26,6 +26,6 @@
   }
   var slots = document.querySelectorAll("[data-views]");
   if (slots.length) fetch("/api/views").then(function (r) { return r.json(); }).then(function (d) {
-    slots.forEach(function (s) { var t = (d.pages || {})[s.getAttribute("data-views")]; s.textContent = t ? fmt(t.views) + " visits" : "new"; });
+    slots.forEach(function (s) { var t = (d.pages || {})[s.getAttribute("data-views")]; s.textContent = t ? fmt(t.views) + (t.views == 1 ? " visit" : " visits") : "new"; });
   }).catch(function () {});
 })();
