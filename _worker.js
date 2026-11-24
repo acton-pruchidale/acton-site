@@ -1,5 +1,5 @@
 // Acton site: Cloudflare Pages advanced-mode worker.
-// Public:  GET /api/site, GET /api/research, POST /api/report, POST /api/request
+// Public:  GET /api/site, GET /api/research, POST /api/report, POST /api/request, POST /api/hit, GET /api/views
 // Admin:   /admin and /admin/api/* (Cloudflare Access protects these; the worker also verifies the Access token itself)
 // Storage: D1 database bound as DB. Settings (plain text, not secret): ACCESS_TEAM, ACCESS_AUD, ADMIN_EMAILS.
 // Everything else is served from the static files.
@@ -12,8 +12,13 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS checkins (id INTEGER PRIMARY KEY AUTOINCREMENT, feel INTEGER, going INTEGER, note TEXT, at TEXT)`,
   `CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, feel INTEGER, going INTEGER, name TEXT, note TEXT, at TEXT, status TEXT NOT NULL DEFAULT 'new')`,
   `CREATE TABLE IF NOT EXISTS requests (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, contact TEXT, kind TEXT, needs TEXT, ready TEXT, likes TEXT, video TEXT, at TEXT, status TEXT NOT NULL DEFAULT 'new', note TEXT)`,
-  `CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)`
+  `CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)`,
+  `CREATE TABLE IF NOT EXISTS views (page TEXT NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, uniq INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (page, day))`
 ];
+// Pages that count visits (Wake 235). Anything else sent to /api/hit is ignored.
+const COUNTED = ["/", "/tools", "/research", "/ask", "/how-a-wake-works", "/quote-builder", "/rate-finder", "/season-planner",
+  "/snow-calculator", "/job-profit-check", "/light-pricer", "/season-profit-check", "/board-game-prompts",
+  "/kestrel", "/tamarack", "/willow-coulee"];
 let schemaReady = false;
 async function ensureSchema(db) {
   if (schemaReady) return;
@@ -123,6 +128,34 @@ async function apiResearch(env, ctx) {
   (counts.results || []).forEach((r) => { if (c[r.kind] !== undefined) c[r.kind] = r.c; });
   return json({ log: log.results || [], counts: c, nic, public: pub, reports: reports.results || [], wakes });
 }
+// ---------- visit counters (Wake 235) ----------
+// Stores only page, day and two numbers. No IP, cookie or visitor id is stored: "first visit today" is decided
+// in the visitor's own browser (localStorage) and sent as a yes/no.
+async function viewTotals(env, page) {
+  const q = page
+    ? env.DB.prepare("SELECT page, SUM(n) AS views, SUM(uniq) AS visitors, MIN(day) AS since FROM views WHERE page=? GROUP BY page").bind(page)
+    : env.DB.prepare("SELECT page, SUM(n) AS views, SUM(uniq) AS visitors, MIN(day) AS since FROM views GROUP BY page");
+  const r = await q.all();
+  const out = {};
+  (r.results || []).forEach((x) => (out[x.page] = { views: x.views, visitors: x.visitors, since: x.since }));
+  return out;
+}
+async function apiHit(request, env) {
+  const b = await readBody(request);
+  const page = b && typeof b.page === "string" ? b.page : "";
+  if (!COUNTED.includes(page)) return json({ ok: false }, 400);
+  const ua = (request.headers.get("user-agent") || "").toLowerCase();
+  if (/bot|crawl|spider|preview|headless/.test(ua)) return json({ ok: true, skipped: true, ...((await viewTotals(env, page))[page] || { views: 0, visitors: 0 }) });
+  const day = new Date().toISOString().slice(0, 10);
+  const first = b.first === true ? 1 : 0;
+  await env.DB.prepare("INSERT INTO views (page, day, n, uniq) VALUES (?, ?, 1, ?) ON CONFLICT(page, day) DO UPDATE SET n = n + 1, uniq = uniq + excluded.uniq")
+    .bind(page, day, first).run();
+  return json({ ok: true, ...((await viewTotals(env, page))[page] || { views: 1, visitors: first }) });
+}
+async function apiViews(env) {
+  return json({ pages: await viewTotals(env, null) }, 200, { "cache-control": "public, max-age=60" });
+}
+
 async function readBody(request) {
   const len = Number(request.headers.get("content-length") || 0);
   if (len > 20000) return null;
@@ -237,7 +270,13 @@ export default {
     const p = url.pathname;
     const isAdmin = p.startsWith("/admin"); // includes the admin-page file itself, so it is never served without sign-in
     const isApi = p.startsWith("/api/");
-    if (!isAdmin && !isApi) return env.ASSETS.fetch(request);
+    if (!isAdmin && !isApi) {
+      // Wake 235: add the visit counter to every public HTML page without editing each file.
+      const r = await env.ASSETS.fetch(request);
+      const type = r.headers.get("content-type") || "";
+      if (!type.includes("text/html") || p.startsWith("/admin-page")) return r;
+      return new HTMLRewriter().on("body", { element(el) { el.append('<script src="/counter.js" defer></script>', { html: true }); } }).transform(r);
+    }
     if (!env.DB) return json({ error: "The database isn't connected yet." }, 503);
     try {
       await ensureSchema(env.DB);
@@ -246,6 +285,8 @@ export default {
         if (p === "/api/research" && request.method === "GET") return apiResearch(env, ctx);
         if (p === "/api/report" && request.method === "POST") return apiReport(request, env);
         if (p === "/api/request" && request.method === "POST") return apiRequest(request, env);
+        if (p === "/api/hit" && request.method === "POST") return apiHit(request, env);
+        if (p === "/api/views" && request.method === "GET") return apiViews(env);
         return json({ error: "not found" }, 404);
       }
       const who = await adminEmail(request, env);
