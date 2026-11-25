@@ -158,6 +158,7 @@ async function apiHit(request, env) {
 // Wake 244 (queue #66, option A): once the worker secret INBOX_KEY is set, only callers that send the matching
 // X-Inbox-Key header get in (the private acton-desk-inbox repo's GitHub Action). Everyone else gets 403.
 // Before the secret exists the route behaves as in Wake 235, so nothing breaks while Nic sets it up.
+// INBOX_KEY set by Nic 25 Nov 2026 (Wake 244); this line also triggered the redeploy that picks it up.
 async function sameSecret(a, b) {
   const enc = new TextEncoder();
   const [x, y] = await Promise.all([crypto.subtle.digest("SHA-256", enc.encode(a)), crypto.subtle.digest("SHA-256", enc.encode(b))]);
