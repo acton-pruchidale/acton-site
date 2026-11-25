@@ -1,5 +1,5 @@
 // Acton site: Cloudflare Pages advanced-mode worker.
-// Public:  GET /api/site, GET /api/research, POST /api/report, POST /api/request, POST /api/hit, GET /api/views, POST /api/pending (entries land as pending only)
+// Public:  GET /api/site, GET /api/research, POST /api/report, POST /api/request, POST /api/hit, GET /api/views, POST /api/pending (entries land as pending only; needs X-Inbox-Key once env.INBOX_KEY is set, Wake 244)
 // Admin:   /admin and /admin/api/* (Cloudflare Access protects these; the worker also verifies the Access token itself)
 // Storage: D1 database bound as DB. Settings (plain text, not secret): ACCESS_TEAM, ACCESS_AUD, ADMIN_EMAILS.
 // Everything else is served from the static files.
@@ -155,7 +155,25 @@ async function apiHit(request, env) {
 // ---------- run-submitted research entries (Wake 235) ----------
 // Scheduled runs add research desk entries here without the /admin sign-in. Entries ALWAYS land as 'pending'
 // (only Nic's /admin decides), ids and seq are assigned here, and there's a daily cap so the queue can't be flooded.
+// Wake 244 (queue #66, option A): once the worker secret INBOX_KEY is set, only callers that send the matching
+// X-Inbox-Key header get in (the private acton-desk-inbox repo's GitHub Action). Everyone else gets 403.
+// Before the secret exists the route behaves as in Wake 235, so nothing breaks while Nic sets it up.
+async function sameSecret(a, b) {
+  const enc = new TextEncoder();
+  const [x, y] = await Promise.all([crypto.subtle.digest("SHA-256", enc.encode(a)), crypto.subtle.digest("SHA-256", enc.encode(b))]);
+  const ax = new Uint8Array(x), by = new Uint8Array(y);
+  let diff = 0;
+  for (let i = 0; i < ax.length; i++) diff |= ax[i] ^ by[i];
+  return diff === 0;
+}
+async function inboxAllowed(request, env) {
+  if (!env.INBOX_KEY) return true; // not configured yet: old open behaviour (Wake 235)
+  const got = request.headers.get("x-inbox-key") || "";
+  if (!got) return false;
+  return sameSecret(got, String(env.INBOX_KEY));
+}
 async function apiPending(request, env) {
+  if (!(await inboxAllowed(request, env))) return json({ error: "forbidden" }, 403);
   const b = await readBody(request);
   const list = b && Array.isArray(b.entries) ? b.entries.slice(0, 12) : [];
   if (!list.length) return json({ error: "no entries" }, 400);
