@@ -107,7 +107,7 @@ async function nicLatest(env) {
   return r ? { feel: r.feel, going: r.going, at: r.at } : null;
 }
 async function publicAverages(env) {
-  const r = await env.DB.prepare("SELECT COUNT(*) AS c, AVG(feel) AS f, AVG(going) AS g FROM reports").first();
+  const r = await env.DB.prepare("SELECT COUNT(*) AS c, AVG(feel) AS f, AVG(going) AS g FROM reports WHERE status != 'spam'").first();
   return r && r.c ? { count: r.c, feel: Math.round(r.f * 10) / 10, going: Math.round(r.g * 10) / 10 } : { count: 0 };
 }
 
@@ -267,7 +267,7 @@ async function adminDecide(request, env) {
   const status = String(b.status || "");
   if (b.table === "entries" && ["approved", "private", "pending"].includes(status)) {
     await env.DB.prepare("UPDATE entries SET status=?, decided_at=? WHERE id=?").bind(status, now(), String(b.id)).run();
-  } else if (b.table === "reports" && ["approved", "private", "new"].includes(status)) {
+  } else if (b.table === "reports" && ["approved", "private", "new", "spam"].includes(status)) {
     await env.DB.prepare("UPDATE reports SET status=? WHERE id=?").bind(status, Number(b.id)).run();
   } else if (b.table === "requests" && ["new", "replied", "taken", "declined", "spam"].includes(status)) {
     await env.DB.prepare("UPDATE requests SET status=?, note=? WHERE id=?").bind(status, str(b.note, 500), Number(b.id)).run();

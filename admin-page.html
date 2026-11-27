@@ -132,6 +132,8 @@ textarea { min-height:6rem; resize:vertical; }
       var a = el("div", "acts");
       if (r.status !== "approved") a.append(button("Show comment publicly", "ok", function () { decide("reports", r.id, "approved", c); }));
       if (r.status !== "private") a.append(button("Keep private", "quiet", function () { decide("reports", r.id, "private", c); }));
+      if (r.status !== "spam") a.append(button("Spam or test: take off the dials", "quiet", function () { decide("reports", r.id, "spam", c); }));
+      else a.append(button("Put back on the dials", "quiet", function () { decide("reports", r.id, "new", c); }));
       c.append(a); host.append(c);
     });
   }
