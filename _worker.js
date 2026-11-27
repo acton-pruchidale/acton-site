@@ -320,6 +320,11 @@ export default {
     const p = url.pathname;
     const isAdmin = p.startsWith("/admin"); // includes the admin-page file itself, so it is never served without sign-in
     const isApi = p.startsWith("/api/");
+    // Wake 258 (26 Nov 2026, Nic's yes): pages on the old address forward to actonpruchidale.com.
+    // /admin stays here until its sign-in covers the new domain; /api stays so posts (the desk inbox) keep working.
+    if (url.hostname === "acton-pruchidale.pages.dev" && !isAdmin && !isApi) {
+      return Response.redirect("https://actonpruchidale.com" + p + url.search, 301);
+    }
     if (!isAdmin && !isApi) {
       // Wake 235: add the visit counter to every public HTML page without editing each file.
       const r = await env.ASSETS.fetch(request);
