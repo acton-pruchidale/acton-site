@@ -320,9 +320,10 @@ export default {
     const p = url.pathname;
     const isAdmin = p.startsWith("/admin"); // includes the admin-page file itself, so it is never served without sign-in
     const isApi = p.startsWith("/api/");
-    // Wake 258 (26 Nov 2026, Nic's yes): pages on the old address forward to actonpruchidale.com.
-    // /admin stays here until its sign-in covers the new domain; /api stays so posts (the desk inbox) keep working.
-    if (url.hostname === "acton-pruchidale.pages.dev" && !isAdmin && !isApi) {
+    // Wake 258 (26 Nov 2026, Nic's yes): the old address and www forward to actonpruchidale.com.
+    // On the old address /api stays so posts (the desk inbox) keep working; /admin forwards too now that
+    // the Access sign-in covers actonpruchidale.com/admin*.
+    if (url.hostname === "www.actonpruchidale.com" || (url.hostname === "acton-pruchidale.pages.dev" && !isApi)) {
       return Response.redirect("https://actonpruchidale.com" + p + url.search, 301);
     }
     if (!isAdmin && !isApi) {
